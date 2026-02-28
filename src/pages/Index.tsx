@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, FileDown, Settings2, Database, BarChart3, Map } from 'lucide-react';
+import { Upload, FileDown, Settings2, Database, BarChart3, Map, FlaskConical } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,6 +11,9 @@ import GravityDataTable from '@/components/GravityDataTable';
 import ManualEntryForm from '@/components/ManualEntryForm';
 import AnomalyCharts from '@/components/AnomalyCharts';
 import StationMap from '@/components/StationMap';
+import RegionalResidualChart from '@/components/RegionalResidualChart';
+import DerivativeCharts from '@/components/DerivativeCharts';
+import PowerSpectrumChart from '@/components/PowerSpectrumChart';
 import type { RawStation, ProcessedStation, CalibrationTable } from '@/lib/gravityCalculations';
 import { processGravityData, DEFAULT_CALIBRATION, DEFAULT_DENSITY } from '@/lib/gravityCalculations';
 import { parseGravityExcel } from '@/lib/excelParser';
@@ -224,6 +227,9 @@ const Index = () => {
               <TabsTrigger value="map" className="gap-1">
                 <Map className="h-3.5 w-3.5" /> Station Map
               </TabsTrigger>
+              <TabsTrigger value="interpretation" className="gap-1">
+                <FlaskConical className="h-3.5 w-3.5" /> Interpretation
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="table">
@@ -246,6 +252,12 @@ const Index = () => {
 
             <TabsContent value="map">
               <StationMap data={processed} />
+            </TabsContent>
+
+            <TabsContent value="interpretation" className="space-y-6">
+              <RegionalResidualChart data={processed} />
+              <DerivativeCharts data={processed} />
+              <PowerSpectrumChart data={processed} />
             </TabsContent>
           </Tabs>
         )}
