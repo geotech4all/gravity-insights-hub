@@ -14,10 +14,13 @@ import StationMap from '@/components/StationMap';
 import RegionalResidualChart from '@/components/RegionalResidualChart';
 import DerivativeCharts from '@/components/DerivativeCharts';
 import PowerSpectrumChart from '@/components/PowerSpectrumChart';
+import ValidationPanel from '@/components/ValidationPanel';
+import ProjectManager from '@/components/ProjectManager';
+import DataExportDialog from '@/components/DataExportDialog';
 import type { RawStation, ProcessedStation, CalibrationTable } from '@/lib/gravityCalculations';
 import { processGravityData, DEFAULT_CALIBRATION, DEFAULT_DENSITY } from '@/lib/gravityCalculations';
-import { parseGravityExcel } from '@/lib/excelParser';
 import { generateReport } from '@/lib/reportGenerator';
+import { detectAndParse, saveProject, type ValidationError, type SavedProject } from '@/lib/dataManager';
 
 const Index = () => {
   const [stations, setStations] = useState<RawStation[]>([]);
@@ -27,18 +30,20 @@ const Index = () => {
   const [baseStationId, setBaseStationId] = useState('');
   const [density, setDensity] = useState(DEFAULT_DENSITY);
   const [projectName, setProjectName] = useState('Gravity Survey');
+  const [validationErrors, setValidationErrors] = useState<ValidationError[]>([]);
 
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
     try {
       const buffer = await file.arrayBuffer();
-      const parsed = parseGravityExcel(buffer);
+      const parsed = detectAndParse(file, buffer);
       setStations(parsed.stations);
       setCalibration(parsed.calibration);
       setKnownAbsValue(parsed.knownAbsValue);
       setBaseStationId(parsed.baseStationId);
-      
+      setValidationErrors(parsed.validationErrors);
+
       const results = processGravityData(
         parsed.stations,
         parsed.knownAbsValue,
@@ -47,9 +52,16 @@ const Index = () => {
         density
       );
       setProcessed(results);
-      toast.success(`Imported ${parsed.stations.length} stations successfully`);
+
+      const errCount = parsed.validationErrors.filter(e => e.severity === 'error').length;
+      const warnCount = parsed.validationErrors.filter(e => e.severity === 'warning').length;
+      if (errCount > 0) {
+        toast.warning(`Imported ${parsed.stations.length} stations (${parsed.format.toUpperCase()}) with ${errCount} errors, ${warnCount} warnings`);
+      } else {
+        toast.success(`Imported ${parsed.stations.length} stations from ${parsed.format.toUpperCase()} file`);
+      }
     } catch (err) {
-      toast.error('Failed to parse Excel file. Check format.');
+      toast.error('Failed to parse file. Check format.');
       console.error(err);
     }
   }, [density]);
@@ -94,6 +106,34 @@ const Index = () => {
     }
   }, [processed, projectName, density, knownAbsValue]);
 
+  const handleSaveProject = useCallback(() => {
+    saveProject({
+      version: 1,
+      projectName,
+      knownAbsValue,
+      baseStationId,
+      density,
+      calibration,
+      stations,
+      savedAt: new Date().toISOString(),
+    });
+    toast.success(`Project "${projectName}" saved`);
+  }, [projectName, knownAbsValue, baseStationId, density, calibration, stations]);
+
+  const handleLoadProject = useCallback((project: SavedProject) => {
+    setStations(project.stations);
+    setCalibration(project.calibration);
+    setKnownAbsValue(project.knownAbsValue);
+    setBaseStationId(project.baseStationId);
+    setDensity(project.density);
+    setProjectName(project.projectName);
+
+    const results = processGravityData(
+      project.stations, project.knownAbsValue, project.baseStationId, project.calibration, project.density
+    );
+    setProcessed(results);
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -107,12 +147,12 @@ const Index = () => {
               <CardTitle className="flex items-center gap-2 text-base">
                 <Upload className="h-4 w-4 text-primary" /> Import Data
               </CardTitle>
-              <CardDescription className="text-xs">Upload Excel spreadsheet (.xlsx)</CardDescription>
+              <CardDescription className="text-xs">Excel, CSV, XYZ, or GXF format</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               <Input
                 type="file"
-                accept=".xlsx,.xls,.csv"
+                accept=".xlsx,.xls,.csv,.xyz,.gxf,.txt"
                 onChange={handleFileUpload}
                 className="h-9 text-sm cursor-pointer"
               />
@@ -178,9 +218,15 @@ const Index = () => {
           {/* Summary Card */}
           <Card>
             <CardHeader className="pb-3">
-              <CardTitle className="flex items-center gap-2 text-base">
-                <Database className="h-4 w-4 text-primary" /> Summary
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Database className="h-4 w-4 text-primary" /> Summary
+                </CardTitle>
+                <div className="flex gap-1.5">
+                  <ProjectManager onSave={handleSaveProject} onLoad={handleLoadProject} />
+                  <DataExportDialog data={processed} projectName={projectName} />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-2 gap-3">
@@ -220,6 +266,11 @@ const Index = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Validation Panel */}
+        {validationErrors.length > 0 && (
+          <ValidationPanel errors={validationErrors} stationCount={stations.length} />
+        )}
 
         {/* Data, Charts, Map Tabs */}
         {processed.length > 0 && (
@@ -276,7 +327,7 @@ const Index = () => {
               <Upload className="h-12 w-12 text-muted-foreground/40 mb-4" />
               <h3 className="text-lg font-semibold text-foreground">No Data Loaded</h3>
               <p className="text-sm text-muted-foreground mt-1 max-w-md">
-                Upload your gravity survey Excel spreadsheet or manually add stations to begin data reduction.
+                Upload your gravity survey spreadsheet (Excel, CSV, XYZ, or GXF) or manually add stations to begin data reduction.
               </p>
             </CardContent>
           </Card>
