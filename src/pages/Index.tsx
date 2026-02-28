@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, FileDown, Settings2, Database } from 'lucide-react';
+import { Upload, FileDown, Settings2, Database, BarChart3, Map } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 import Header from '@/components/Header';
 import GravityDataTable from '@/components/GravityDataTable';
 import ManualEntryForm from '@/components/ManualEntryForm';
+import AnomalyCharts from '@/components/AnomalyCharts';
+import StationMap from '@/components/StationMap';
 import type { RawStation, ProcessedStation, CalibrationTable } from '@/lib/gravityCalculations';
 import { processGravityData, DEFAULT_CALIBRATION, DEFAULT_DENSITY } from '@/lib/gravityCalculations';
 import { parseGravityExcel } from '@/lib/excelParser';
@@ -209,19 +211,43 @@ const Index = () => {
           </Card>
         </div>
 
-        {/* Data Table */}
+        {/* Data, Charts, Map Tabs */}
         {processed.length > 0 && (
-          <Card>
-            <CardHeader className="pb-3">
-              <CardTitle className="text-base">Processed Gravity Data</CardTitle>
-              <CardDescription className="text-xs">
-                All corrections applied: Drift, Latitude (GRS80), Free Air, Bouguer (ρ={density} g/cm³)
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <GravityDataTable data={processed} />
-            </CardContent>
-          </Card>
+          <Tabs defaultValue="table" className="w-full">
+            <TabsList className="mb-4">
+              <TabsTrigger value="table" className="gap-1">
+                <Database className="h-3.5 w-3.5" /> Data Table
+              </TabsTrigger>
+              <TabsTrigger value="charts" className="gap-1">
+                <BarChart3 className="h-3.5 w-3.5" /> Charts
+              </TabsTrigger>
+              <TabsTrigger value="map" className="gap-1">
+                <Map className="h-3.5 w-3.5" /> Station Map
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="table">
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-base">Processed Gravity Data</CardTitle>
+                  <CardDescription className="text-xs">
+                    All corrections applied: Drift, Latitude (GRS80), Free Air, Bouguer (ρ={density} g/cm³)
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <GravityDataTable data={processed} />
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="charts">
+              <AnomalyCharts data={processed} />
+            </TabsContent>
+
+            <TabsContent value="map">
+              <StationMap data={processed} />
+            </TabsContent>
+          </Tabs>
         )}
 
         {/* Empty state */}
