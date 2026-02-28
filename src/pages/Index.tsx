@@ -82,7 +82,11 @@ const Index = () => {
       return;
     }
     try {
-      await generateReport(processed, projectName, density, knownAbsValue);
+      await generateReport(processed, projectName, density, knownAbsValue, {
+        includeInterpretation: true,
+        polynomialDegree: 2,
+        anomalyType: 'bouguerAnomaly',
+      });
       toast.success('Report downloaded');
     } catch (err) {
       toast.error('Failed to generate report');
@@ -208,8 +212,11 @@ const Index = () => {
                 )}
               </div>
               <Button onClick={handleExport} className="w-full mt-4" disabled={processed.length === 0}>
-                <FileDown className="mr-2 h-4 w-4" /> Export Word Report
+                <FileDown className="mr-2 h-4 w-4" /> Export Full Report
               </Button>
+              <p className="text-[10px] text-muted-foreground text-center mt-1">
+                Includes data tables, statistics, and interpretation results
+              </p>
             </CardContent>
           </Card>
         </div>
