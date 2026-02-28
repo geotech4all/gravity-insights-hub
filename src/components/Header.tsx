@@ -17,7 +17,7 @@ const Header = () => {
         </div>
         <nav className="flex items-center gap-2 text-sm text-secondary-foreground/80">
           <span className="rounded-full bg-primary/20 px-3 py-1 text-xs font-medium text-primary">
-            Phase 1
+            Phase 2
           </span>
         </nav>
       </div>
