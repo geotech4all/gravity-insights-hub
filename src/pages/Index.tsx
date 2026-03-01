@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import Header from '@/components/Header';
+import SplashScreen from '@/components/SplashScreen';
 import GravityDataTable from '@/components/GravityDataTable';
 import ManualEntryForm from '@/components/ManualEntryForm';
 import AnomalyCharts from '@/components/AnomalyCharts';
@@ -23,6 +24,7 @@ import { generateReport } from '@/lib/reportGenerator';
 import { detectAndParse, saveProject, type ValidationError, type SavedProject } from '@/lib/dataManager';
 
 const Index = () => {
+  const [showSplash, setShowSplash] = useState(true);
   const [stations, setStations] = useState<RawStation[]>([]);
   const [processed, setProcessed] = useState<ProcessedStation[]>([]);
   const [calibration, setCalibration] = useState<CalibrationTable[]>(DEFAULT_CALIBRATION);
@@ -133,6 +135,10 @@ const Index = () => {
     );
     setProcessed(results);
   }, []);
+
+  if (showSplash) {
+    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -336,7 +342,7 @@ const Index = () => {
 
       <footer className="border-t bg-card py-4 mt-8">
         <div className="container mx-auto text-center text-xs text-muted-foreground">
-          © {new Date().getFullYear()} Geotech4All — Gravity Data Reduction WebApp
+          © {new Date().getFullYear()} GraviMag Cloud — by Geotech4All
         </div>
       </footer>
     </div>

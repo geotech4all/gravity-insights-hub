@@ -1,18 +1,16 @@
-import { Globe } from 'lucide-react';
+import GraviMagLogo from './GraviMagLogo';
 
 const Header = () => {
   return (
-    <header className="bg-secondary text-secondary-foreground">
+    <header className="bg-secondary text-secondary-foreground border-b-2 border-primary">
       <div className="container mx-auto flex items-center justify-between py-4 px-4">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary">
-            <Globe className="h-6 w-6 text-primary-foreground" />
-          </div>
+          <GraviMagLogo size={40} />
           <div>
             <h1 className="text-xl font-bold tracking-tight">
-              Geotech<span className="text-primary">4All</span>
+              Gravi<span className="text-primary">Mag</span> Cloud
             </h1>
-            <p className="text-xs text-secondary-foreground/70">Gravity Data Reduction WebApp</p>
+            <p className="text-xs text-secondary-foreground/70">by Geotech4All</p>
           </div>
         </div>
         <nav className="flex items-center gap-2 text-sm text-secondary-foreground/80">
