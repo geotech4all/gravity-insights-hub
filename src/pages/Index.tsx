@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Upload, FileDown, Settings2, Database, BarChart3, Map, FlaskConical } from 'lucide-react';
+import { Upload, FileDown, Settings2, Database, BarChart3, Map, FlaskConical, Shield, Layers, Gauge } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -15,6 +15,10 @@ import StationMap from '@/components/StationMap';
 import RegionalResidualChart from '@/components/RegionalResidualChart';
 import DerivativeCharts from '@/components/DerivativeCharts';
 import PowerSpectrumChart from '@/components/PowerSpectrumChart';
+import ContinuationChart from '@/components/ContinuationChart';
+import EulerDeconvolutionChart from '@/components/EulerDeconvolutionChart';
+import CorrectionsPanel from '@/components/CorrectionsPanel';
+import QCDashboard from '@/components/QCDashboard';
 import ValidationPanel from '@/components/ValidationPanel';
 import ProjectManager from '@/components/ProjectManager';
 import DataExportDialog from '@/components/DataExportDialog';
@@ -294,6 +298,12 @@ const Index = () => {
               <TabsTrigger value="interpretation" className="gap-1">
                 <FlaskConical className="h-3.5 w-3.5" /> Interpretation
               </TabsTrigger>
+              <TabsTrigger value="corrections" className="gap-1">
+                <Layers className="h-3.5 w-3.5" /> Corrections
+              </TabsTrigger>
+              <TabsTrigger value="qc" className="gap-1">
+                <Gauge className="h-3.5 w-3.5" /> Survey QC
+              </TabsTrigger>
             </TabsList>
 
             <TabsContent value="table">
@@ -322,6 +332,16 @@ const Index = () => {
               <RegionalResidualChart data={processed} />
               <DerivativeCharts data={processed} />
               <PowerSpectrumChart data={processed} />
+              <ContinuationChart data={processed} />
+              <EulerDeconvolutionChart data={processed} />
+            </TabsContent>
+
+            <TabsContent value="corrections">
+              <CorrectionsPanel data={processed} />
+            </TabsContent>
+
+            <TabsContent value="qc">
+              <QCDashboard data={processed} />
             </TabsContent>
           </Tabs>
         )}
