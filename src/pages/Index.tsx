@@ -1,5 +1,6 @@
-import { useState, useCallback } from 'react';
-import { Upload, FileDown, Settings2, Database, BarChart3, Map, FlaskConical, Layers, Gauge, Magnet } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Upload, FileDown, Settings2, Database, BarChart3, Map, FlaskConical, Layers, Gauge, Magnet, Save, Cloud } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +21,6 @@ import EulerDeconvolutionChart from '@/components/EulerDeconvolutionChart';
 import CorrectionsPanel from '@/components/CorrectionsPanel';
 import QCDashboard from '@/components/QCDashboard';
 import ValidationPanel from '@/components/ValidationPanel';
-import ProjectManager from '@/components/ProjectManager';
 import DataExportDialog from '@/components/DataExportDialog';
 import TemplateDownloader from '@/components/TemplateDownloader';
 import MagneticDataTable from '@/components/MagneticDataTable';
@@ -29,14 +29,20 @@ import MagneticAdvanced from '@/components/MagneticAdvanced';
 import type { RawStation, ProcessedStation, CalibrationTable } from '@/lib/gravityCalculations';
 import { processGravityData, DEFAULT_CALIBRATION, DEFAULT_DENSITY } from '@/lib/gravityCalculations';
 import { generateReport } from '@/lib/reportGenerator';
-import { detectAndParse, saveProject, type ValidationError, type SavedProject } from '@/lib/dataManager';
+import { detectAndParse, type ValidationError } from '@/lib/dataManager';
 import { detectAndParseMagnetic } from '@/lib/magneticParser';
 import { processMagneticData, DEFAULT_MAG_PARAMS, type RawMagStation, type ProcessedMagStation, type MagProcessingParams } from '@/lib/magneticCalculations';
+import { saveCloudProject, loadCloudProject, type CloudProjectData } from '@/lib/cloudProjects';
 
 type DataMode = 'gravity' | 'magnetic';
 
 const Index = () => {
-  const [showSplash, setShowSplash] = useState(true);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const projectId = searchParams.get('project');
+  const [cloudId, setCloudId] = useState<string | null>(projectId);
+  const [saving, setSaving] = useState(false);
+  const [showSplash, setShowSplash] = useState(!projectId);
   const [mode, setMode] = useState<DataMode>('gravity');
 
   // Gravity state
@@ -110,21 +116,35 @@ const Index = () => {
     } catch (err) { toast.error('Failed to generate report'); console.error(err); }
   }, [processed, projectName, density, knownAbsValue]);
 
-  const handleSaveProject = useCallback(() => {
-    saveProject({ version: 1, projectName, knownAbsValue, baseStationId, density, calibration, stations, savedAt: new Date().toISOString() });
-    toast.success(`Project "${projectName}" saved`);
-  }, [projectName, knownAbsValue, baseStationId, density, calibration, stations]);
+  const handleSaveProject = useCallback(async () => {
+    setSaving(true);
+    try {
+      const data: CloudProjectData = mode === 'gravity'
+        ? { stations, calibration, knownAbsValue, baseStationId, density }
+        : { magStations, magParams };
+      const id = await saveCloudProject(cloudId, projectName, mode, data);
+      setCloudId(id);
+      // Update URL without reload
+      window.history.replaceState(null, '', `/editor?project=${id}`);
+      toast.success(`Project "${projectName}" saved to cloud`);
+    } catch (err) {
+      toast.error('Failed to save project');
+      console.error(err);
+    }
+    setSaving(false);
+  }, [cloudId, projectName, mode, stations, calibration, knownAbsValue, baseStationId, density, magStations, magParams]);
 
-  const handleLoadProject = useCallback((project: SavedProject) => {
-    setStations(project.stations);
-    setCalibration(project.calibration);
-    setKnownAbsValue(project.knownAbsValue);
-    setBaseStationId(project.baseStationId);
-    setDensity(project.density);
-    setProjectName(project.projectName);
-    const results = processGravityData(project.stations, project.knownAbsValue, project.baseStationId, project.calibration, project.density);
-    setProcessed(results);
-  }, []);
+  // Load cloud project on mount
+  useEffect(() => {
+    if (!projectId) return;
+    loadCloudProject(projectId).then((p) => {
+      const d = p.project_data as CloudProjectData;
+      setProjectName(p.name);
+      setMode(p.data_mode as DataMode);
+      if (d.stations) { setStations(d.stations); setCalibration(d.calibration || DEFAULT_CALIBRATION); setKnownAbsValue(d.knownAbsValue || 978125.672); setBaseStationId(d.baseStationId || ''); setDensity(d.density || DEFAULT_DENSITY); const results = processGravityData(d.stations, d.knownAbsValue || 978125.672, d.baseStationId || '', d.calibration || DEFAULT_CALIBRATION, d.density || DEFAULT_DENSITY); setProcessed(results); }
+      if (d.magStations) { setMagStations(d.magStations); setMagParams(d.magParams || DEFAULT_MAG_PARAMS); const results = processMagneticData(d.magStations, d.magParams || DEFAULT_MAG_PARAMS); setMagProcessed(results); }
+    }).catch(() => toast.error('Failed to load project'));
+  }, [projectId]);
 
   // ─── Magnetic handlers ───────────────────────────────────────────
   const handleMagFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -248,7 +268,9 @@ const Index = () => {
                       <Database className="h-4 w-4 text-primary" /> Summary
                     </CardTitle>
                     <div className="flex gap-1.5">
-                      <ProjectManager onSave={handleSaveProject} onLoad={handleLoadProject} />
+                      <Button variant="outline" size="sm" onClick={handleSaveProject} disabled={saving} className="h-7 text-xs gap-1">
+                        <Cloud className="h-3 w-3" /> {saving ? 'Saving...' : 'Save'}
+                      </Button>
                       <DataExportDialog data={processed} projectName={projectName} />
                     </div>
                   </div>
