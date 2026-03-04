@@ -34,6 +34,7 @@ import { detectAndParse, type ValidationError } from '@/lib/dataManager';
 import { detectAndParseMagnetic } from '@/lib/magneticParser';
 import { processMagneticData, DEFAULT_MAG_PARAMS, type RawMagStation, type ProcessedMagStation, type MagProcessingParams } from '@/lib/magneticCalculations';
 import { saveCloudProject, loadCloudProject, type CloudProjectData } from '@/lib/cloudProjects';
+import { logActivity } from '@/lib/activityLogger';
 
 type DataMode = 'gravity' | 'magnetic';
 
@@ -128,6 +129,7 @@ const Index = () => {
       // Update URL without reload
       window.history.replaceState(null, '', `/editor?project=${id}`);
       toast.success(`Project "${projectName}" saved to cloud`);
+      logActivity('save_project', { project_id: id, name: projectName, mode });
     } catch (err) {
       toast.error('Failed to save project');
       console.error(err);
