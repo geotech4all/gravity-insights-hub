@@ -26,6 +26,7 @@ import TemplateDownloader from '@/components/TemplateDownloader';
 import MagneticDataTable from '@/components/MagneticDataTable';
 import MagneticCharts from '@/components/MagneticCharts';
 import MagneticAdvanced from '@/components/MagneticAdvanced';
+import MagneticStationMap from '@/components/MagneticStationMap';
 import type { RawStation, ProcessedStation, CalibrationTable } from '@/lib/gravityCalculations';
 import { processGravityData, DEFAULT_CALIBRATION, DEFAULT_DENSITY } from '@/lib/gravityCalculations';
 import { generateReport } from '@/lib/reportGenerator';
@@ -419,9 +420,14 @@ const Index = () => {
               {/* Summary */}
               <Card>
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-base">
-                    <Database className="h-4 w-4 text-primary" /> Magnetic Summary
-                  </CardTitle>
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="flex items-center gap-2 text-base">
+                      <Database className="h-4 w-4 text-primary" /> Magnetic Summary
+                    </CardTitle>
+                    <Button variant="outline" size="sm" onClick={handleSaveProject} disabled={saving} className="h-7 text-xs gap-1">
+                      <Cloud className="h-3 w-3" /> {saving ? 'Saving...' : 'Save'}
+                    </Button>
+                  </div>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-2 gap-3">
@@ -459,10 +465,12 @@ const Index = () => {
                 <TabsList className="mb-4">
                   <TabsTrigger value="table" className="gap-1"><Database className="h-3.5 w-3.5" /> Data Table</TabsTrigger>
                   <TabsTrigger value="charts" className="gap-1"><BarChart3 className="h-3.5 w-3.5" /> Charts</TabsTrigger>
+                  <TabsTrigger value="map" className="gap-1"><Map className="h-3.5 w-3.5" /> Station Map</TabsTrigger>
                   <TabsTrigger value="advanced" className="gap-1"><FlaskConical className="h-3.5 w-3.5" /> Advanced</TabsTrigger>
                 </TabsList>
                 <TabsContent value="table"><MagneticDataTable data={magProcessed} /></TabsContent>
                 <TabsContent value="charts"><MagneticCharts data={magProcessed} /></TabsContent>
+                <TabsContent value="map"><MagneticStationMap data={magProcessed} /></TabsContent>
                 <TabsContent value="advanced"><MagneticAdvanced data={magProcessed} latitude={magParams.latitude} /></TabsContent>
               </Tabs>
             )}
