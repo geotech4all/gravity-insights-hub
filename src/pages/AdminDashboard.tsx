@@ -3,20 +3,22 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Users, FolderOpen, Activity, Search, Loader2, Shield, ArrowLeft } from 'lucide-react';
+import { Users, FolderOpen, Activity, Search, Loader2, Shield, ArrowLeft, Crown } from 'lucide-react';
 
 interface UserProfile {
   user_id: string;
   display_name: string | null;
   organization: string | null;
   avatar_url: string | null;
+  subscription_tier: string;
   created_at: string;
 }
 
@@ -38,6 +40,12 @@ interface ActivityLog {
   created_at: string;
 }
 
+const TIER_BADGE: Record<string, string> = {
+  free: 'bg-muted text-muted-foreground',
+  standard: 'bg-primary/10 text-primary',
+  enterprise: 'bg-amber-500/10 text-amber-600',
+};
+
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -48,18 +56,11 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
-  useEffect(() => {
-    checkAdmin();
-  }, [user]);
+  useEffect(() => { checkAdmin(); }, [user]);
 
   const checkAdmin = async () => {
     if (!user) return;
-    const { data } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', user.id)
-      .eq('role', 'admin')
-      .maybeSingle();
+    const { data } = await supabase.from('user_roles').select('role').eq('user_id', user.id).eq('role', 'admin').maybeSingle();
     const admin = !!data;
     setIsAdmin(admin);
     if (admin) fetchAll();
@@ -73,10 +74,17 @@ const AdminDashboard = () => {
       supabase.from('projects').select('id, name, user_id, data_mode, created_at, updated_at').order('updated_at', { ascending: false }),
       supabase.from('user_activity_logs').select('*').order('created_at', { ascending: false }).limit(200),
     ]);
-    setUsers((usersRes.data as UserProfile[]) || []);
+    setUsers((usersRes.data as any[]) || []);
     setProjects((projectsRes.data as ProjectRow[]) || []);
     setLogs((logsRes.data as ActivityLog[]) || []);
     setLoading(false);
+  };
+
+  const handleTierChange = async (userId: string, newTier: string) => {
+    const { error } = await supabase.from('profiles').update({ subscription_tier: newTier } as any).eq('user_id', userId);
+    if (error) { toast.error('Failed to update tier'); return; }
+    setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, subscription_tier: newTier } : u));
+    toast.success(`Tier updated to ${newTier}`);
   };
 
   if (isAdmin === null || loading) {
@@ -131,52 +139,10 @@ const AdminDashboard = () => {
 
         {/* Stats */}
         <div className="grid gap-4 sm:grid-cols-4">
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <Users className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">{users.length}</p>
-                  <p className="text-xs text-muted-foreground">Total Users</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <FolderOpen className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">{projects.length}</p>
-                  <p className="text-xs text-muted-foreground">Total Projects</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <Activity className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">{logs.length}</p>
-                  <p className="text-xs text-muted-foreground">Activity Logs</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <FolderOpen className="h-8 w-8 text-primary" />
-                <div>
-                  <p className="text-2xl font-bold">
-                    {projects.filter(p => p.data_mode === 'gravity').length} / {projects.filter(p => p.data_mode === 'magnetic').length}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Gravity / Magnetic</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><Users className="h-8 w-8 text-primary" /><div><p className="text-2xl font-bold">{users.length}</p><p className="text-xs text-muted-foreground">Total Users</p></div></div></CardContent></Card>
+          <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><FolderOpen className="h-8 w-8 text-primary" /><div><p className="text-2xl font-bold">{projects.length}</p><p className="text-xs text-muted-foreground">Total Projects</p></div></div></CardContent></Card>
+          <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><Activity className="h-8 w-8 text-primary" /><div><p className="text-2xl font-bold">{logs.length}</p><p className="text-xs text-muted-foreground">Activity Logs</p></div></div></CardContent></Card>
+          <Card><CardContent className="pt-6"><div className="flex items-center gap-3"><Crown className="h-8 w-8 text-primary" /><div><p className="text-2xl font-bold">{users.filter(u => u.subscription_tier !== 'free').length}</p><p className="text-xs text-muted-foreground">Paid Users</p></div></div></CardContent></Card>
         </div>
 
         <Tabs defaultValue="users" className="w-full">
@@ -198,6 +164,7 @@ const AdminDashboard = () => {
                     <TableRow>
                       <TableHead>Name</TableHead>
                       <TableHead>Organization</TableHead>
+                      <TableHead>Tier</TableHead>
                       <TableHead>Projects</TableHead>
                       <TableHead>Joined</TableHead>
                     </TableRow>
@@ -207,6 +174,18 @@ const AdminDashboard = () => {
                       <TableRow key={u.user_id}>
                         <TableCell className="font-medium">{u.display_name || 'Unnamed'}</TableCell>
                         <TableCell>{u.organization || '—'}</TableCell>
+                        <TableCell>
+                          <Select value={u.subscription_tier} onValueChange={v => handleTierChange(u.user_id, v)}>
+                            <SelectTrigger className="h-7 w-[110px] text-xs">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="free">Free</SelectItem>
+                              <SelectItem value="standard">Standard</SelectItem>
+                              <SelectItem value="enterprise">Enterprise</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
                         <TableCell><Badge variant="secondary">{userProjectCount(u.user_id)}</Badge></TableCell>
                         <TableCell className="text-xs text-muted-foreground">{new Date(u.created_at).toLocaleDateString()}</TableCell>
                       </TableRow>
