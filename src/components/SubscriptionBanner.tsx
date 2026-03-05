@@ -47,7 +47,7 @@ export default function SubscriptionBanner() {
           size="sm"
           variant="outline"
           className="gap-1.5 shrink-0"
-          onClick={() => toast.info('Subscription upgrade coming soon! Contact admin@geotech4all.com')}
+          onClick={() => toast.info('Subscription upgrade coming soon! Contact support@geotech4all.com')}
         >
           {tier === 'free' ? <Zap className="h-3.5 w-3.5" /> : <Crown className="h-3.5 w-3.5" />}
           Upgrade
