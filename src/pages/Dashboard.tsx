@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 import { Plus, FolderOpen, Trash2, Clock, Layers, Magnet, Search, Loader2, Users } from 'lucide-react';
 import Header from '@/components/Header';
 import ShareProjectDialog from '@/components/ShareProjectDialog';
+import SubscriptionBanner from '@/components/SubscriptionBanner';
 import { logActivity } from '@/lib/activityLogger';
 
 interface CloudProject {
