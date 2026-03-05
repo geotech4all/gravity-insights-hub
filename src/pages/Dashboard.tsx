@@ -151,6 +151,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-6 space-y-6">
+        <SubscriptionBanner />
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-foreground">My Projects</h2>
