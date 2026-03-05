@@ -73,7 +73,13 @@ const Dashboard = () => {
     setLoading(false);
   };
 
-  const handleNewProject = () => navigate('/editor');
+  const handleNewProject = () => {
+    if (!canCreateProject) {
+      toast.error('Project limit reached. Upgrade your plan to create more projects.');
+      return;
+    }
+    navigate('/editor');
+  };
   const handleOpenProject = (id: string) => navigate(`/editor?project=${id}`);
 
   const handleDeleteProject = async (id: string, name: string) => {
