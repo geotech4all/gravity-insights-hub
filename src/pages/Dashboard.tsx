@@ -30,6 +30,7 @@ interface SharedProject extends CloudProject {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { canCreateProject } = useSubscription();
   const [projects, setProjects] = useState<CloudProject[]>([]);
   const [sharedProjects, setSharedProjects] = useState<SharedProject[]>([]);
   const [loading, setLoading] = useState(true);
