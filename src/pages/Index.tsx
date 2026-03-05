@@ -415,6 +415,10 @@ const Index = () => {
                     />
                     <Label htmlFor="useIGRF" className="text-xs">Use IGRF as regional field</Label>
                   </div>
+                  <div>
+                    <Label className="text-xs">Project Name</Label>
+                    <Input type="text" value={projectName} onChange={e => setProjectName(e.target.value)} className="h-8 text-sm" placeholder="Magnetic Survey" />
+                  </div>
                   <Button onClick={handleMagReprocess} size="sm" variant="secondary" className="w-full mt-1">Reprocess Data</Button>
                 </CardContent>
               </Card>

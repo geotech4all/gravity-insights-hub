@@ -21,6 +21,7 @@ export type Database = {
           display_name: string | null
           id: string
           organization: string | null
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
           updated_at: string
           user_id: string
         }
@@ -30,6 +31,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           organization?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string
           user_id: string
         }
@@ -39,6 +41,7 @@ export type Database = {
           display_name?: string | null
           id?: string
           organization?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
           updated_at?: string
           user_id?: string
         }
@@ -165,6 +168,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_project_limit: { Args: { _user_id: string }; Returns: number }
+      get_user_project_count: { Args: { _user_id: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -176,6 +181,7 @@ export type Database = {
     Enums: {
       app_role: "admin" | "user"
       share_permission: "viewer" | "editor"
+      subscription_tier: "free" | "standard" | "enterprise"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -305,6 +311,7 @@ export const Constants = {
     Enums: {
       app_role: ["admin", "user"],
       share_permission: ["viewer", "editor"],
+      subscription_tier: ["free", "standard", "enterprise"],
     },
   },
 } as const

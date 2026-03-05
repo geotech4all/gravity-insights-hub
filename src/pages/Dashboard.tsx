@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +11,7 @@ import { toast } from 'sonner';
 import { Plus, FolderOpen, Trash2, Clock, Layers, Magnet, Search, Loader2, Users } from 'lucide-react';
 import Header from '@/components/Header';
 import ShareProjectDialog from '@/components/ShareProjectDialog';
+import SubscriptionBanner from '@/components/SubscriptionBanner';
 import { logActivity } from '@/lib/activityLogger';
 
 interface CloudProject {
@@ -28,6 +30,7 @@ interface SharedProject extends CloudProject {
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { canCreateProject } = useSubscription();
   const [projects, setProjects] = useState<CloudProject[]>([]);
   const [sharedProjects, setSharedProjects] = useState<SharedProject[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,7 +73,13 @@ const Dashboard = () => {
     setLoading(false);
   };
 
-  const handleNewProject = () => navigate('/editor');
+  const handleNewProject = () => {
+    if (!canCreateProject) {
+      toast.error('Project limit reached. Upgrade your plan to create more projects.');
+      return;
+    }
+    navigate('/editor');
+  };
   const handleOpenProject = (id: string) => navigate(`/editor?project=${id}`);
 
   const handleDeleteProject = async (id: string, name: string) => {
@@ -142,6 +151,7 @@ const Dashboard = () => {
     <div className="min-h-screen bg-background">
       <Header />
       <main className="container mx-auto px-4 py-6 space-y-6">
+        <SubscriptionBanner />
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-bold text-foreground">My Projects</h2>
