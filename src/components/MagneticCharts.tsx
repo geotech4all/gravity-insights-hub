@@ -48,11 +48,14 @@ const MagneticCharts = ({ data }: Props) => {
 
       <TabsContent value="anomaly">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Magnetic Anomaly Profile</CardTitle>
-            <CardDescription className="text-xs">Total anomaly and reduced values along profile</CardDescription>
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Magnetic Anomaly Profile</CardTitle>
+              <CardDescription className="text-xs">Total anomaly and reduced values along profile</CardDescription>
+            </div>
+            <ChartDownloadButton containerRef={anomalyRef} filename="magnetic_anomaly" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={anomalyRef}>
             <ResponsiveContainer width="100%" height={400}>
               <AreaChart data={chartData}>
                 <defs>
