@@ -9,6 +9,7 @@ import type { ProcessedStation } from '@/lib/gravityCalculations';
 import { computeContinuation } from '@/lib/advancedCalculations';
 
 const ContinuationChart = ({ data }: { data: ProcessedStation[] }) => {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(2);
   const [direction, setDirection] = useState<'up' | 'down'>('up');
   const [anomalyType, setAnomalyType] = useState<'bouguerAnomaly' | 'freeAirAnomaly'>('bouguerAnomaly');
