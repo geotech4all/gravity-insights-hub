@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts';
+import ChartDownloadButton from '@/components/ChartDownloadButton';
 import type { ProcessedStation } from '@/lib/gravityCalculations';
 import { computePowerSpectrum } from '@/lib/interpretationCalculations';
 
