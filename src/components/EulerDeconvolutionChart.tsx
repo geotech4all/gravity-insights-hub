@@ -9,6 +9,7 @@ import type { ProcessedStation } from '@/lib/gravityCalculations';
 import { computeEulerDeconvolution } from '@/lib/advancedCalculations';
 
 const EulerDeconvolutionChart = ({ data }: { data: ProcessedStation[] }) => {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [si, setSI] = useState(1);
   const [windowSize, setWindowSize] = useState(7);
   const [anomalyType, setAnomalyType] = useState<'bouguerAnomaly' | 'freeAirAnomaly'>('bouguerAnomaly');
