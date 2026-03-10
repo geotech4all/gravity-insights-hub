@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ResponsiveContainer, LineChart, Line, AreaChart, Area,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
+import ChartDownloadButton from '@/components/ChartDownloadButton';
 import type { ProcessedMagStation } from '@/lib/magneticCalculations';
 
 interface Props {
