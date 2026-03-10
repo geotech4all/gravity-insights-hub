@@ -131,10 +131,11 @@ const AnomalyCharts = ({ data }: Props) => {
       {/* Corrections Chart */}
       <TabsContent value="corrections">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-sm">Applied Corrections per Station</CardTitle>
+            <ChartDownloadButton containerRef={correctionsRef} filename="corrections" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={correctionsRef}>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={displayData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 87%)" />
