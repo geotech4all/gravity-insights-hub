@@ -79,11 +79,14 @@ const MagneticCharts = ({ data }: Props) => {
 
       <TabsContent value="field">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Total Magnetic Field</CardTitle>
-            <CardDescription className="text-xs">Raw field readings along profile</CardDescription>
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Total Magnetic Field</CardTitle>
+              <CardDescription className="text-xs">Raw field readings along profile</CardDescription>
+            </div>
+            <ChartDownloadButton containerRef={fieldRef} filename="total_magnetic_field" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={fieldRef}>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
