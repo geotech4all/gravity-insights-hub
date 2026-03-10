@@ -28,6 +28,11 @@ const ACCENT_BLUE = 'hsl(210, 70%, 50%)';
 const MUTED_GRAY = 'hsl(220, 9%, 46%)';
 
 const AnomalyCharts = ({ data }: Props) => {
+  const profileRef = useRef<HTMLDivElement>(null);
+  const comparisonRef = useRef<HTMLDivElement>(null);
+  const correctionsRef = useRef<HTMLDivElement>(null);
+  const elevationRef = useRef<HTMLDivElement>(null);
+
   const displayData = data
     .filter(d => !d.remark?.toLowerCase().includes('close loop'))
     .map((d, i) => ({
