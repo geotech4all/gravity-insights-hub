@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis } from 'recharts';
+import ChartDownloadButton from '@/components/ChartDownloadButton';
 import type { ProcessedStation } from '@/lib/gravityCalculations';
 import { computeEulerDeconvolution } from '@/lib/advancedCalculations';
 
