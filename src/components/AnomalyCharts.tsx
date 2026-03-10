@@ -75,10 +75,11 @@ const AnomalyCharts = ({ data }: Props) => {
       {/* Anomaly Profile - Line Chart */}
       <TabsContent value="profile">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-sm">Free Air & Bouguer Anomaly Profiles</CardTitle>
+            <ChartDownloadButton containerRef={profileRef} filename="anomaly_profiles" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={profileRef}>
             <ResponsiveContainer width="100%" height={400}>
               <AreaChart data={displayData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                 <defs>
