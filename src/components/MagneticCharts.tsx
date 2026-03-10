@@ -13,6 +13,10 @@ interface Props {
 }
 
 const MagneticCharts = ({ data }: Props) => {
+  const anomalyRef = useRef<HTMLDivElement>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const correctionsRef = useRef<HTMLDivElement>(null);
+
   const chartData = useMemo(() => data.map(s => ({
     distance: s.distance,
     sn: s.sn,
