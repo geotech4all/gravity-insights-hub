@@ -108,10 +108,11 @@ const AnomalyCharts = ({ data }: Props) => {
       {/* FAA vs BA Comparison */}
       <TabsContent value="comparison">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-sm">FAA vs BA Comparison</CardTitle>
+            <ChartDownloadButton containerRef={comparisonRef} filename="faa_vs_ba" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={comparisonRef}>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={displayData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 87%)" />
