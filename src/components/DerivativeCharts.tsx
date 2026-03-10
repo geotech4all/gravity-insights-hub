@@ -30,13 +30,16 @@ const DerivativeCharts = ({ data }: Props) => {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Derivative Filters & Edge Detection</CardTitle>
-        <CardDescription className="text-xs">
-          Horizontal/vertical gradients and analytic signal for structural mapping
-        </CardDescription>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-base">Derivative Filters & Edge Detection</CardTitle>
+          <CardDescription className="text-xs">
+            Horizontal/vertical gradients and analytic signal for structural mapping
+          </CardDescription>
+        </div>
+        <ChartDownloadButton containerRef={chartRef} filename="derivatives" />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" ref={chartRef}>
         <Tabs value={anomalyType} onValueChange={(v) => setAnomalyType(v as typeof anomalyType)}>
           <TabsList className="h-8">
             <TabsTrigger value="bouguerAnomaly" className="text-xs">Bouguer Anomaly</TabsTrigger>

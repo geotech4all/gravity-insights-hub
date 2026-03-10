@@ -18,13 +18,16 @@ const EulerDeconvolutionChart = ({ data }: { data: ProcessedStation[] }) => {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Euler Deconvolution (2D Profile)</CardTitle>
-        <CardDescription className="text-xs">
-          Automatic source depth estimation — SI={si} ({si === 0 ? 'Contact' : si === 1 ? 'Dike/Sill' : si === 2 ? 'Cylinder' : 'Sphere'})
-        </CardDescription>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-base">Euler Deconvolution (2D Profile)</CardTitle>
+          <CardDescription className="text-xs">
+            Automatic source depth estimation — SI={si} ({si === 0 ? 'Contact' : si === 1 ? 'Dike/Sill' : si === 2 ? 'Cylinder' : 'Sphere'})
+          </CardDescription>
+        </div>
+        <ChartDownloadButton containerRef={chartRef} filename="euler_deconvolution" />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" ref={chartRef}>
         <div className="flex gap-4 items-end flex-wrap">
           <div className="space-y-1">
             <Label className="text-xs">Structural Index</Label>

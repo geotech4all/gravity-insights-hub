@@ -103,11 +103,14 @@ const MagneticCharts = ({ data }: Props) => {
 
       <TabsContent value="corrections">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Applied Corrections</CardTitle>
-            <CardDescription className="text-xs">Drift and diurnal corrections along profile</CardDescription>
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Applied Corrections</CardTitle>
+              <CardDescription className="text-xs">Drift and diurnal corrections along profile</CardDescription>
+            </div>
+            <ChartDownloadButton containerRef={correctionsRef} filename="magnetic_corrections" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={correctionsRef}>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />

@@ -154,10 +154,11 @@ const AnomalyCharts = ({ data }: Props) => {
       {/* Elevation Profile */}
       <TabsContent value="elevation">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-sm">Elevation Profile</CardTitle>
+            <ChartDownloadButton containerRef={elevationRef} filename="elevation_profile" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={elevationRef}>
             <ResponsiveContainer width="100%" height={400}>
               <AreaChart data={displayData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                 <defs>

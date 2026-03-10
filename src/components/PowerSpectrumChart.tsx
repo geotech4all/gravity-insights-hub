@@ -35,13 +35,16 @@ const PowerSpectrumChart = ({ data }: Props) => {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Power Spectrum Analysis</CardTitle>
-        <CardDescription className="text-xs">
-          Radially-averaged power spectrum for depth-to-source estimation
-        </CardDescription>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-base">Power Spectrum Analysis</CardTitle>
+          <CardDescription className="text-xs">
+            Radially-averaged power spectrum for depth-to-source estimation
+          </CardDescription>
+        </div>
+        <ChartDownloadButton containerRef={chartRef} filename="power_spectrum" />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" ref={chartRef}>
         <div className="flex flex-wrap items-center gap-4">
           <Tabs value={anomalyType} onValueChange={(v) => setAnomalyType(v as typeof anomalyType)}>
             <TabsList className="h-8">

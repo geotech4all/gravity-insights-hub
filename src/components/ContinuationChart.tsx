@@ -19,13 +19,16 @@ const ContinuationChart = ({ data }: { data: ProcessedStation[] }) => {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Upward / Downward Continuation</CardTitle>
-        <CardDescription className="text-xs">
-          {direction === 'up' ? 'Attenuates shallow sources (smoothing)' : 'Enhances shallow sources (sharpening)'}
-        </CardDescription>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-base">Upward / Downward Continuation</CardTitle>
+          <CardDescription className="text-xs">
+            {direction === 'up' ? 'Attenuates shallow sources (smoothing)' : 'Enhances shallow sources (sharpening)'}
+          </CardDescription>
+        </div>
+        <ChartDownloadButton containerRef={chartRef} filename="continuation" />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" ref={chartRef}>
         <div className="flex gap-4 items-end flex-wrap">
           <div className="space-y-1">
             <Label className="text-xs">Direction</Label>
