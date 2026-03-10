@@ -13,6 +13,7 @@ interface Props {
 }
 
 const DerivativeCharts = ({ data }: Props) => {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [anomalyType, setAnomalyType] = useState<'freeAirAnomaly' | 'bouguerAnomaly'>('bouguerAnomaly');
 
   const results = useMemo(

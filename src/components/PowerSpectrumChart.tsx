@@ -14,6 +14,7 @@ interface Props {
 }
 
 const PowerSpectrumChart = ({ data }: Props) => {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [anomalyType, setAnomalyType] = useState<'freeAirAnomaly' | 'bouguerAnomaly'>('bouguerAnomaly');
 
   const { spectrum, depthEstimates } = useMemo(
