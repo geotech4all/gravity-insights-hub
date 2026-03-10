@@ -84,7 +84,17 @@ const AdminDashboard = () => {
     const { error } = await supabase.from('profiles').update({ subscription_tier: newTier } as any).eq('user_id', userId);
     if (error) { toast.error('Failed to update tier'); return; }
     setUsers(prev => prev.map(u => u.user_id === userId ? { ...u, subscription_tier: newTier } : u));
-    toast.success(`Tier updated to ${newTier}`);
+    // Log the tier change activity
+    if (user) {
+      const targetUser = users.find(u => u.user_id === userId);
+      await supabase.from('user_activity_logs').insert({
+        user_id: user.id,
+        user_email: user.email,
+        action: 'tier_upgrade',
+        metadata: { target_user_id: userId, target_name: targetUser?.display_name, new_tier: newTier },
+      });
+    }
+    toast.success(`Tier updated to ${newTier}. Email notification will be sent when email service is configured.`);
   };
 
   if (isAdmin === null || loading) {

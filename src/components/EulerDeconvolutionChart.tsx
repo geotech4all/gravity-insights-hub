@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ZAxis } from 'recharts';
+import ChartDownloadButton from '@/components/ChartDownloadButton';
 import type { ProcessedStation } from '@/lib/gravityCalculations';
 import { computeEulerDeconvolution } from '@/lib/advancedCalculations';
 
 const EulerDeconvolutionChart = ({ data }: { data: ProcessedStation[] }) => {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [si, setSI] = useState(1);
   const [windowSize, setWindowSize] = useState(7);
   const [anomalyType, setAnomalyType] = useState<'bouguerAnomaly' | 'freeAirAnomaly'>('bouguerAnomaly');
@@ -16,13 +18,16 @@ const EulerDeconvolutionChart = ({ data }: { data: ProcessedStation[] }) => {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Euler Deconvolution (2D Profile)</CardTitle>
-        <CardDescription className="text-xs">
-          Automatic source depth estimation — SI={si} ({si === 0 ? 'Contact' : si === 1 ? 'Dike/Sill' : si === 2 ? 'Cylinder' : 'Sphere'})
-        </CardDescription>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-base">Euler Deconvolution (2D Profile)</CardTitle>
+          <CardDescription className="text-xs">
+            Automatic source depth estimation — SI={si} ({si === 0 ? 'Contact' : si === 1 ? 'Dike/Sill' : si === 2 ? 'Cylinder' : 'Sphere'})
+          </CardDescription>
+        </div>
+        <ChartDownloadButton containerRef={chartRef} filename="euler_deconvolution" />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" ref={chartRef}>
         <div className="flex gap-4 items-end flex-wrap">
           <div className="space-y-1">
             <Label className="text-xs">Structural Index</Label>

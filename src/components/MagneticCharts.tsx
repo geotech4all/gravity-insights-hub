@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   ResponsiveContainer, LineChart, Line, AreaChart, Area,
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
 } from 'recharts';
+import ChartDownloadButton from '@/components/ChartDownloadButton';
 import type { ProcessedMagStation } from '@/lib/magneticCalculations';
 
 interface Props {
@@ -12,6 +13,10 @@ interface Props {
 }
 
 const MagneticCharts = ({ data }: Props) => {
+  const anomalyRef = useRef<HTMLDivElement>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
+  const correctionsRef = useRef<HTMLDivElement>(null);
+
   const chartData = useMemo(() => data.map(s => ({
     distance: s.distance,
     sn: s.sn,
@@ -47,11 +52,14 @@ const MagneticCharts = ({ data }: Props) => {
 
       <TabsContent value="anomaly">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Magnetic Anomaly Profile</CardTitle>
-            <CardDescription className="text-xs">Total anomaly and reduced values along profile</CardDescription>
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Magnetic Anomaly Profile</CardTitle>
+              <CardDescription className="text-xs">Total anomaly and reduced values along profile</CardDescription>
+            </div>
+            <ChartDownloadButton containerRef={anomalyRef} filename="magnetic_anomaly" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={anomalyRef}>
             <ResponsiveContainer width="100%" height={400}>
               <AreaChart data={chartData}>
                 <defs>
@@ -75,11 +83,14 @@ const MagneticCharts = ({ data }: Props) => {
 
       <TabsContent value="field">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Total Magnetic Field</CardTitle>
-            <CardDescription className="text-xs">Raw field readings along profile</CardDescription>
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Total Magnetic Field</CardTitle>
+              <CardDescription className="text-xs">Raw field readings along profile</CardDescription>
+            </div>
+            <ChartDownloadButton containerRef={fieldRef} filename="total_magnetic_field" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={fieldRef}>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
@@ -96,11 +107,14 @@ const MagneticCharts = ({ data }: Props) => {
 
       <TabsContent value="corrections">
         <Card>
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Applied Corrections</CardTitle>
-            <CardDescription className="text-xs">Drift and diurnal corrections along profile</CardDescription>
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <div>
+              <CardTitle className="text-base">Applied Corrections</CardTitle>
+              <CardDescription className="text-xs">Drift and diurnal corrections along profile</CardDescription>
+            </div>
+            <ChartDownloadButton containerRef={correctionsRef} filename="magnetic_corrections" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={correctionsRef}>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />

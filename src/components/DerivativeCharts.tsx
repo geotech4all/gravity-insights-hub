@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, AreaChart, Area
 } from 'recharts';
+import ChartDownloadButton from '@/components/ChartDownloadButton';
 import type { ProcessedStation } from '@/lib/gravityCalculations';
 import { computeDerivatives } from '@/lib/interpretationCalculations';
 
@@ -12,6 +13,7 @@ interface Props {
 }
 
 const DerivativeCharts = ({ data }: Props) => {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [anomalyType, setAnomalyType] = useState<'freeAirAnomaly' | 'bouguerAnomaly'>('bouguerAnomaly');
 
   const results = useMemo(
@@ -29,13 +31,16 @@ const DerivativeCharts = ({ data }: Props) => {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Derivative Filters & Edge Detection</CardTitle>
-        <CardDescription className="text-xs">
-          Horizontal/vertical gradients and analytic signal for structural mapping
-        </CardDescription>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-base">Derivative Filters & Edge Detection</CardTitle>
+          <CardDescription className="text-xs">
+            Horizontal/vertical gradients and analytic signal for structural mapping
+          </CardDescription>
+        </div>
+        <ChartDownloadButton containerRef={chartRef} filename="derivatives" />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" ref={chartRef}>
         <Tabs value={anomalyType} onValueChange={(v) => setAnomalyType(v as typeof anomalyType)}>
           <TabsList className="h-8">
             <TabsTrigger value="bouguerAnomaly" className="text-xs">Bouguer Anomaly</TabsTrigger>

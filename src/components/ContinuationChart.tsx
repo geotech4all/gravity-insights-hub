@@ -1,13 +1,15 @@
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import ChartDownloadButton from '@/components/ChartDownloadButton';
 import type { ProcessedStation } from '@/lib/gravityCalculations';
 import { computeContinuation } from '@/lib/advancedCalculations';
 
 const ContinuationChart = ({ data }: { data: ProcessedStation[] }) => {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(2);
   const [direction, setDirection] = useState<'up' | 'down'>('up');
   const [anomalyType, setAnomalyType] = useState<'bouguerAnomaly' | 'freeAirAnomaly'>('bouguerAnomaly');
@@ -17,13 +19,16 @@ const ContinuationChart = ({ data }: { data: ProcessedStation[] }) => {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Upward / Downward Continuation</CardTitle>
-        <CardDescription className="text-xs">
-          {direction === 'up' ? 'Attenuates shallow sources (smoothing)' : 'Enhances shallow sources (sharpening)'}
-        </CardDescription>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-base">Upward / Downward Continuation</CardTitle>
+          <CardDescription className="text-xs">
+            {direction === 'up' ? 'Attenuates shallow sources (smoothing)' : 'Enhances shallow sources (sharpening)'}
+          </CardDescription>
+        </div>
+        <ChartDownloadButton containerRef={chartRef} filename="continuation" />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" ref={chartRef}>
         <div className="flex gap-4 items-end flex-wrap">
           <div className="space-y-1">
             <Label className="text-xs">Direction</Label>

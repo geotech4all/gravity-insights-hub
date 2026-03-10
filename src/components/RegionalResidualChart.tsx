@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
@@ -6,6 +6,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, ComposedChart
 } from 'recharts';
+import ChartDownloadButton from '@/components/ChartDownloadButton';
 import type { ProcessedStation } from '@/lib/gravityCalculations';
 import { computeRegionalResidual } from '@/lib/interpretationCalculations';
 
@@ -14,6 +15,7 @@ interface Props {
 }
 
 const RegionalResidualChart = ({ data }: Props) => {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [degree, setDegree] = useState(2);
   const [anomalyType, setAnomalyType] = useState<'freeAirAnomaly' | 'bouguerAnomaly'>('bouguerAnomaly');
 
@@ -32,13 +34,16 @@ const RegionalResidualChart = ({ data }: Props) => {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Regional-Residual Separation</CardTitle>
-        <CardDescription className="text-xs">
-          Polynomial trend fitting (degree {degree}) to separate regional from residual anomalies
-        </CardDescription>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-base">Regional-Residual Separation</CardTitle>
+          <CardDescription className="text-xs">
+            Polynomial trend fitting (degree {degree}) to separate regional from residual anomalies
+          </CardDescription>
+        </div>
+        <ChartDownloadButton containerRef={chartRef} filename="regional_residual" />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" ref={chartRef}>
         <div className="flex flex-wrap items-center gap-6">
           <Tabs value={anomalyType} onValueChange={(v) => setAnomalyType(v as typeof anomalyType)}>
             <TabsList className="h-8">

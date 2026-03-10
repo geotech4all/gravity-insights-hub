@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import {
   ResponsiveContainer,
   LineChart,
@@ -14,6 +15,7 @@ import {
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import ChartDownloadButton from '@/components/ChartDownloadButton';
 import type { ProcessedStation } from '@/lib/gravityCalculations';
 
 interface Props {
@@ -26,6 +28,11 @@ const ACCENT_BLUE = 'hsl(210, 70%, 50%)';
 const MUTED_GRAY = 'hsl(220, 9%, 46%)';
 
 const AnomalyCharts = ({ data }: Props) => {
+  const profileRef = useRef<HTMLDivElement>(null);
+  const comparisonRef = useRef<HTMLDivElement>(null);
+  const correctionsRef = useRef<HTMLDivElement>(null);
+  const elevationRef = useRef<HTMLDivElement>(null);
+
   const displayData = data
     .filter(d => !d.remark?.toLowerCase().includes('close loop'))
     .map((d, i) => ({
@@ -68,10 +75,11 @@ const AnomalyCharts = ({ data }: Props) => {
       {/* Anomaly Profile - Line Chart */}
       <TabsContent value="profile">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-sm">Free Air & Bouguer Anomaly Profiles</CardTitle>
+            <ChartDownloadButton containerRef={profileRef} filename="anomaly_profiles" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={profileRef}>
             <ResponsiveContainer width="100%" height={400}>
               <AreaChart data={displayData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                 <defs>
@@ -100,10 +108,11 @@ const AnomalyCharts = ({ data }: Props) => {
       {/* FAA vs BA Comparison */}
       <TabsContent value="comparison">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-sm">FAA vs BA Comparison</CardTitle>
+            <ChartDownloadButton containerRef={comparisonRef} filename="faa_vs_ba" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={comparisonRef}>
             <ResponsiveContainer width="100%" height={400}>
               <BarChart data={displayData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 87%)" />
@@ -122,10 +131,11 @@ const AnomalyCharts = ({ data }: Props) => {
       {/* Corrections Chart */}
       <TabsContent value="corrections">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-sm">Applied Corrections per Station</CardTitle>
+            <ChartDownloadButton containerRef={correctionsRef} filename="corrections" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={correctionsRef}>
             <ResponsiveContainer width="100%" height={400}>
               <LineChart data={displayData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(220, 13%, 87%)" />
@@ -144,10 +154,11 @@ const AnomalyCharts = ({ data }: Props) => {
       {/* Elevation Profile */}
       <TabsContent value="elevation">
         <Card>
-          <CardHeader className="pb-2">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <CardTitle className="text-sm">Elevation Profile</CardTitle>
+            <ChartDownloadButton containerRef={elevationRef} filename="elevation_profile" />
           </CardHeader>
-          <CardContent>
+          <CardContent ref={elevationRef}>
             <ResponsiveContainer width="100%" height={400}>
               <AreaChart data={displayData} margin={{ top: 10, right: 30, left: 10, bottom: 10 }}>
                 <defs>

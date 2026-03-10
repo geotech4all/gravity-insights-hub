@@ -1,10 +1,11 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import {
   ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine
 } from 'recharts';
+import ChartDownloadButton from '@/components/ChartDownloadButton';
 import type { ProcessedStation } from '@/lib/gravityCalculations';
 import { computePowerSpectrum } from '@/lib/interpretationCalculations';
 
@@ -13,6 +14,7 @@ interface Props {
 }
 
 const PowerSpectrumChart = ({ data }: Props) => {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [anomalyType, setAnomalyType] = useState<'freeAirAnomaly' | 'bouguerAnomaly'>('bouguerAnomaly');
 
   const { spectrum, depthEstimates } = useMemo(
@@ -34,13 +36,16 @@ const PowerSpectrumChart = ({ data }: Props) => {
 
   return (
     <Card>
-      <CardHeader className="pb-3">
-        <CardTitle className="text-base">Power Spectrum Analysis</CardTitle>
-        <CardDescription className="text-xs">
-          Radially-averaged power spectrum for depth-to-source estimation
-        </CardDescription>
+      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+        <div>
+          <CardTitle className="text-base">Power Spectrum Analysis</CardTitle>
+          <CardDescription className="text-xs">
+            Radially-averaged power spectrum for depth-to-source estimation
+          </CardDescription>
+        </div>
+        <ChartDownloadButton containerRef={chartRef} filename="power_spectrum" />
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4" ref={chartRef}>
         <div className="flex flex-wrap items-center gap-4">
           <Tabs value={anomalyType} onValueChange={(v) => setAnomalyType(v as typeof anomalyType)}>
             <TabsList className="h-8">
