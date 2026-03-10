@@ -15,6 +15,7 @@ interface Props {
 }
 
 const RegionalResidualChart = ({ data }: Props) => {
+  const chartRef = useRef<HTMLDivElement>(null);
   const [degree, setDegree] = useState(2);
   const [anomalyType, setAnomalyType] = useState<'freeAirAnomaly' | 'bouguerAnomaly'>('bouguerAnomaly');
 
