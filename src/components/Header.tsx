@@ -62,6 +62,9 @@ const Header = () => {
                 <DropdownMenuItem onClick={() => navigate('/')} className="gap-2 cursor-pointer">
                   <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
                 </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/profile')} className="gap-2 cursor-pointer">
+                  <User className="h-3.5 w-3.5" /> Profile Settings
+                </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate('/admin')} className="gap-2 cursor-pointer">
                     <Shield className="h-3.5 w-3.5" /> Admin Panel
