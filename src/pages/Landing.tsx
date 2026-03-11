@@ -155,9 +155,11 @@ const Landing = () => {
             <span className="text-sm font-medium text-foreground">GraviMag Cloud</span>
             <span className="text-xs text-muted-foreground">by Geotech4All</span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} Geotech4All. All rights reserved.
-          </p>
+          <div className="flex items-center gap-4">
+            <button onClick={() => navigate('/terms')} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Terms of Service</button>
+            <button onClick={() => navigate('/privacy')} className="text-xs text-muted-foreground hover:text-foreground transition-colors">Privacy Policy</button>
+            <span className="text-xs text-muted-foreground">© {new Date().getFullYear()} Geotech4All</span>
+          </div>
         </div>
       </footer>
     </div>
