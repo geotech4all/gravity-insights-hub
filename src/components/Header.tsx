@@ -6,7 +6,7 @@ import GraviMagLogo from './GraviMagLogo';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, LayoutDashboard, Shield } from 'lucide-react';
+import { LogOut, LayoutDashboard, Shield, User } from 'lucide-react';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -61,6 +61,9 @@ const Header = () => {
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => navigate('/')} className="gap-2 cursor-pointer">
                   <LayoutDashboard className="h-3.5 w-3.5" /> Dashboard
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/profile')} className="gap-2 cursor-pointer">
+                  <User className="h-3.5 w-3.5" /> Profile Settings
                 </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate('/admin')} className="gap-2 cursor-pointer">
