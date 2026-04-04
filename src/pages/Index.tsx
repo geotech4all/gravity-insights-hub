@@ -434,6 +434,14 @@ const Index = () => {
                 </CardContent>
               </Card>
 
+              {/* Batch Import Card */}
+              <BatchUpload<RawMagStation>
+                mode="magnetic"
+                accept=".xlsx,.xls,.csv"
+                parseFile={parseMagneticFile}
+                onBatchComplete={handleMagBatchComplete}
+              />
+
               {/* Parameters */}
               <Card>
                 <CardHeader className="pb-3">
