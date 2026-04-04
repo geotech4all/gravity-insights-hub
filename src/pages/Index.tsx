@@ -201,6 +201,30 @@ const Index = () => {
     }
   }, [magParams]);
 
+  // Magnetic batch parse wrapper
+  const parseMagneticFile = useCallback((file: File, buffer: ArrayBuffer) => {
+    const parsed = detectAndParseMagnetic(file, buffer);
+    return {
+      stations: parsed.stations,
+      meta: { driftFactor: parsed.driftFactor, regionalField: parsed.regionalField },
+    };
+  }, []);
+
+  const handleMagBatchComplete = useCallback((results: BatchFileResult<RawMagStation>[]) => {
+    const allStations = results.flatMap(r => r.stations);
+    if (allStations.length === 0) return;
+    const firstSuccess = results.find(r => r.status === 'success' && r.meta);
+    const params = {
+      ...magParams,
+      driftFactor: firstSuccess?.meta?.driftFactor ?? magParams.driftFactor,
+      regionalField: firstSuccess?.meta?.regionalField ?? magParams.regionalField,
+    };
+    setMagParams(params);
+    setMagStations(allStations);
+    const processed = processMagneticData(allStations, params);
+    setMagProcessed(processed);
+  }, [magParams]);
+
   const handleMagReprocess = useCallback(() => {
     if (magStations.length === 0) { toast.error('No magnetic data'); return; }
     const results = processMagneticData(magStations, magParams);
