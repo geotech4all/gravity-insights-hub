@@ -250,7 +250,8 @@ export async function generateMagneticReport(
   let advancedSection: (Paragraph | Table)[] = [];
 
   if (includeAdvanced && reportData.length >= 4) {
-    const avgLat = latitude ?? (reportData.filter(s => s.latitude).map(s => s.latitude!).reduce((a, b) => a + b, 0) / reportData.filter(s => s.latitude).length) || 7.0;
+    const coordStations = reportData.filter(s => s.latitude);
+    const avgLat = latitude ?? (coordStations.length > 0 ? coordStations.map(s => s.latitude!).reduce((a, b) => a + b, 0) / coordStations.length : 7.0);
     const inclination = computeInclination(avgLat);
 
     // RTP
