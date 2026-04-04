@@ -35,6 +35,7 @@ import { detectAndParseMagnetic } from '@/lib/magneticParser';
 import { processMagneticData, DEFAULT_MAG_PARAMS, type RawMagStation, type ProcessedMagStation, type MagProcessingParams } from '@/lib/magneticCalculations';
 import { saveCloudProject, loadCloudProject, type CloudProjectData } from '@/lib/cloudProjects';
 import { logActivity } from '@/lib/activityLogger';
+import BatchUpload, { type BatchFileResult } from '@/components/BatchUpload';
 
 type DataMode = 'gravity' | 'magnetic';
 
