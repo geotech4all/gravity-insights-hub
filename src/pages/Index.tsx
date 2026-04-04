@@ -30,6 +30,7 @@ import MagneticStationMap from '@/components/MagneticStationMap';
 import type { RawStation, ProcessedStation, CalibrationTable } from '@/lib/gravityCalculations';
 import { processGravityData, DEFAULT_CALIBRATION, DEFAULT_DENSITY } from '@/lib/gravityCalculations';
 import { generateReport } from '@/lib/reportGenerator';
+import { generateMagneticReport } from '@/lib/magneticReportGenerator';
 import { detectAndParse, type ValidationError } from '@/lib/dataManager';
 import { detectAndParseMagnetic } from '@/lib/magneticParser';
 import { processMagneticData, DEFAULT_MAG_PARAMS, type RawMagStation, type ProcessedMagStation, type MagProcessingParams } from '@/lib/magneticCalculations';
@@ -231,6 +232,14 @@ const Index = () => {
     setMagProcessed(results);
     toast.success('Magnetic data reprocessed');
   }, [magStations, magParams]);
+
+  const handleMagExport = useCallback(async () => {
+    if (magProcessed.length === 0) { toast.error('No processed magnetic data to export'); return; }
+    try {
+      await generateMagneticReport(magProcessed, projectName, { includeAdvanced: true, latitude: magParams.latitude });
+      toast.success('Magnetic report downloaded');
+    } catch (err) { toast.error('Failed to generate magnetic report'); console.error(err); }
+  }, [magProcessed, projectName, magParams.latitude]);
 
   if (showSplash) {
     return <SplashScreen onComplete={() => setShowSplash(false)} />;
@@ -527,6 +536,9 @@ const Index = () => {
                       </>
                     )}
                   </div>
+                  <Button onClick={handleMagExport} className="w-full mt-4" disabled={magProcessed.length === 0}>
+                    <FileDown className="mr-2 h-4 w-4" /> Export Full Report
+                  </Button>
                 </CardContent>
               </Card>
             </div>
