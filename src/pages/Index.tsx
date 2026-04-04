@@ -92,6 +92,30 @@ const Index = () => {
     }
   }, [density]);
 
+  // Gravity batch parse wrapper
+  const parseGravityFile = useCallback((file: File, buffer: ArrayBuffer) => {
+    const parsed = detectAndParse(file, buffer);
+    return {
+      stations: parsed.stations,
+      meta: { calibration: parsed.calibration, knownAbsValue: parsed.knownAbsValue, baseStationId: parsed.baseStationId },
+    };
+  }, []);
+
+  const handleGravityBatchComplete = useCallback((results: BatchFileResult<RawStation>[]) => {
+    const allStations = results.flatMap(r => r.stations);
+    if (allStations.length === 0) return;
+    // Use meta from first successful file for calibration etc.
+    const firstSuccess = results.find(r => r.status === 'success' && r.meta);
+    if (firstSuccess?.meta) {
+      setCalibration(firstSuccess.meta.calibration || calibration);
+      setKnownAbsValue(firstSuccess.meta.knownAbsValue || knownAbsValue);
+      setBaseStationId(firstSuccess.meta.baseStationId || baseStationId);
+    }
+    setStations(allStations);
+    const results2 = processGravityData(allStations, firstSuccess?.meta?.knownAbsValue || knownAbsValue, firstSuccess?.meta?.baseStationId || baseStationId, firstSuccess?.meta?.calibration || calibration, density);
+    setProcessed(results2);
+  }, [calibration, knownAbsValue, baseStationId, density]);
+
   const handleAddStation = useCallback((station: RawStation) => {
     setStations(prev => {
       const updated = [...prev, station];
