@@ -282,6 +282,14 @@ const Index = () => {
                 </CardContent>
               </Card>
 
+              {/* Batch Import Card */}
+              <BatchUpload<RawStation>
+                mode="gravity"
+                accept=".xlsx,.xls,.csv,.xyz,.gxf,.txt"
+                parseFile={parseGravityFile}
+                onBatchComplete={handleGravityBatchComplete}
+              />
+
               {/* Parameters Card */}
               <Card>
                 <CardHeader className="pb-3">
