@@ -30,6 +30,7 @@ import MagneticStationMap from '@/components/MagneticStationMap';
 import type { RawStation, ProcessedStation, CalibrationTable } from '@/lib/gravityCalculations';
 import { processGravityData, DEFAULT_CALIBRATION, DEFAULT_DENSITY } from '@/lib/gravityCalculations';
 import { generateReport } from '@/lib/reportGenerator';
+import { generateMagneticReport } from '@/lib/magneticReportGenerator';
 import { detectAndParse, type ValidationError } from '@/lib/dataManager';
 import { detectAndParseMagnetic } from '@/lib/magneticParser';
 import { processMagneticData, DEFAULT_MAG_PARAMS, type RawMagStation, type ProcessedMagStation, type MagProcessingParams } from '@/lib/magneticCalculations';
