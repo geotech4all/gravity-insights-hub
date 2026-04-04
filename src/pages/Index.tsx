@@ -233,6 +233,14 @@ const Index = () => {
     toast.success('Magnetic data reprocessed');
   }, [magStations, magParams]);
 
+  const handleMagExport = useCallback(async () => {
+    if (magProcessed.length === 0) { toast.error('No processed magnetic data to export'); return; }
+    try {
+      await generateMagneticReport(magProcessed, projectName, { includeAdvanced: true, latitude: magParams.latitude });
+      toast.success('Magnetic report downloaded');
+    } catch (err) { toast.error('Failed to generate magnetic report'); console.error(err); }
+  }, [magProcessed, projectName, magParams.latitude]);
+
   if (showSplash) {
     return <SplashScreen onComplete={() => setShowSplash(false)} />;
   }
