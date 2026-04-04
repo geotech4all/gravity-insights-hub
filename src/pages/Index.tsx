@@ -536,6 +536,9 @@ const Index = () => {
                       </>
                     )}
                   </div>
+                  <Button onClick={handleMagExport} className="w-full mt-4" disabled={magProcessed.length === 0}>
+                    <FileDown className="mr-2 h-4 w-4" /> Export Full Report
+                  </Button>
                 </CardContent>
               </Card>
             </div>
