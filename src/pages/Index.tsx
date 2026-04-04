@@ -35,6 +35,7 @@ import { detectAndParseMagnetic } from '@/lib/magneticParser';
 import { processMagneticData, DEFAULT_MAG_PARAMS, type RawMagStation, type ProcessedMagStation, type MagProcessingParams } from '@/lib/magneticCalculations';
 import { saveCloudProject, loadCloudProject, type CloudProjectData } from '@/lib/cloudProjects';
 import { logActivity } from '@/lib/activityLogger';
+import BatchUpload, { type BatchFileResult } from '@/components/BatchUpload';
 
 type DataMode = 'gravity' | 'magnetic';
 
@@ -90,6 +91,30 @@ const Index = () => {
       console.error(err);
     }
   }, [density]);
+
+  // Gravity batch parse wrapper
+  const parseGravityFile = useCallback((file: File, buffer: ArrayBuffer) => {
+    const parsed = detectAndParse(file, buffer);
+    return {
+      stations: parsed.stations,
+      meta: { calibration: parsed.calibration, knownAbsValue: parsed.knownAbsValue, baseStationId: parsed.baseStationId },
+    };
+  }, []);
+
+  const handleGravityBatchComplete = useCallback((results: BatchFileResult<RawStation>[]) => {
+    const allStations = results.flatMap(r => r.stations);
+    if (allStations.length === 0) return;
+    // Use meta from first successful file for calibration etc.
+    const firstSuccess = results.find(r => r.status === 'success' && r.meta);
+    if (firstSuccess?.meta) {
+      setCalibration(firstSuccess.meta.calibration || calibration);
+      setKnownAbsValue(firstSuccess.meta.knownAbsValue || knownAbsValue);
+      setBaseStationId(firstSuccess.meta.baseStationId || baseStationId);
+    }
+    setStations(allStations);
+    const results2 = processGravityData(allStations, firstSuccess?.meta?.knownAbsValue || knownAbsValue, firstSuccess?.meta?.baseStationId || baseStationId, firstSuccess?.meta?.calibration || calibration, density);
+    setProcessed(results2);
+  }, [calibration, knownAbsValue, baseStationId, density]);
 
   const handleAddStation = useCallback((station: RawStation) => {
     setStations(prev => {
@@ -176,6 +201,30 @@ const Index = () => {
     }
   }, [magParams]);
 
+  // Magnetic batch parse wrapper
+  const parseMagneticFile = useCallback((file: File, buffer: ArrayBuffer) => {
+    const parsed = detectAndParseMagnetic(file, buffer);
+    return {
+      stations: parsed.stations,
+      meta: { driftFactor: parsed.driftFactor, regionalField: parsed.regionalField },
+    };
+  }, []);
+
+  const handleMagBatchComplete = useCallback((results: BatchFileResult<RawMagStation>[]) => {
+    const allStations = results.flatMap(r => r.stations);
+    if (allStations.length === 0) return;
+    const firstSuccess = results.find(r => r.status === 'success' && r.meta);
+    const params = {
+      ...magParams,
+      driftFactor: firstSuccess?.meta?.driftFactor ?? magParams.driftFactor,
+      regionalField: firstSuccess?.meta?.regionalField ?? magParams.regionalField,
+    };
+    setMagParams(params);
+    setMagStations(allStations);
+    const processed = processMagneticData(allStations, params);
+    setMagProcessed(processed);
+  }, [magParams]);
+
   const handleMagReprocess = useCallback(() => {
     if (magStations.length === 0) { toast.error('No magnetic data'); return; }
     const results = processMagneticData(magStations, magParams);
@@ -218,7 +267,7 @@ const Index = () => {
         {/* ═══════════════════════ GRAVITY MODE ═══════════════════════ */}
         {mode === 'gravity' && (
           <>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {/* Import Card */}
               <Card>
                 <CardHeader className="pb-3">
@@ -232,6 +281,14 @@ const Index = () => {
                   <ManualEntryForm onAdd={handleAddStation} />
                 </CardContent>
               </Card>
+
+              {/* Batch Import Card */}
+              <BatchUpload<RawStation>
+                mode="gravity"
+                accept=".xlsx,.xls,.csv,.xyz,.gxf,.txt"
+                parseFile={parseGravityFile}
+                onBatchComplete={handleGravityBatchComplete}
+              />
 
               {/* Parameters Card */}
               <Card>
@@ -363,7 +420,7 @@ const Index = () => {
         {/* ═══════════════════════ MAGNETIC MODE ═══════════════════════ */}
         {mode === 'magnetic' && (
           <>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {/* Import */}
               <Card>
                 <CardHeader className="pb-3">
@@ -376,6 +433,14 @@ const Index = () => {
                   <Input type="file" accept=".xlsx,.xls,.csv" onChange={handleMagFileUpload} className="h-9 text-sm cursor-pointer" />
                 </CardContent>
               </Card>
+
+              {/* Batch Import Card */}
+              <BatchUpload<RawMagStation>
+                mode="magnetic"
+                accept=".xlsx,.xls,.csv"
+                parseFile={parseMagneticFile}
+                onBatchComplete={handleMagBatchComplete}
+              />
 
               {/* Parameters */}
               <Card>
