@@ -267,7 +267,7 @@ const Index = () => {
         {/* ═══════════════════════ GRAVITY MODE ═══════════════════════ */}
         {mode === 'gravity' && (
           <>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
               {/* Import Card */}
               <Card>
                 <CardHeader className="pb-3">
