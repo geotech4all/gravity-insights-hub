@@ -40,9 +40,6 @@ const Header = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="rounded-full bg-primary-foreground/20 px-3 py-1 text-xs font-medium text-primary-foreground">
-            Phase 5
-          </span>
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>

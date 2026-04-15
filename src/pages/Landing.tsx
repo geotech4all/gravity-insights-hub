@@ -28,11 +28,12 @@ const tiers = [
   },
   {
     name: 'Standard',
-    price: '$29',
+    price: '$20',
     period: '/month',
     features: ['50 projects', 'Everything in Free', 'Priority support', 'Team collaboration', 'Bulk data import'],
     cta: 'Upgrade',
     highlight: true,
+    earlyBird: '$18/mo for first 3 months',
   },
   {
     name: 'Enterprise',
