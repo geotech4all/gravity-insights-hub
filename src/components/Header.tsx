@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { LogOut, LayoutDashboard, Shield, User } from 'lucide-react';
+import NotificationBell from './NotificationBell';
 
 const Header = () => {
   const { user, signOut } = useAuth();
@@ -39,6 +40,7 @@ const Header = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {user && <NotificationBell />}
           {user && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
