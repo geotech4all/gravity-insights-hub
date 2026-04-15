@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import GraviMagLogo from '@/components/GraviMagLogo';
+
 import {
   BarChart3, Globe, Share2, Download, Shield, Zap,
   Check, ArrowRight, MapPin, FileSpreadsheet, Brain,
@@ -28,11 +28,12 @@ const tiers = [
   },
   {
     name: 'Standard',
-    price: '$29',
+    price: '$20',
     period: '/month',
     features: ['50 projects', 'Everything in Free', 'Priority support', 'Team collaboration', 'Bulk data import'],
     cta: 'Upgrade',
     highlight: true,
+    earlyBird: '$18/mo for first 3 months',
   },
   {
     name: 'Enterprise',
@@ -53,7 +54,6 @@ const Landing = () => {
       <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <GraviMagLogo size={28} />
             <span className="font-bold text-foreground">GraviMag Cloud</span>
           </div>
           <div className="flex items-center gap-2">
@@ -126,6 +126,9 @@ const Landing = () => {
                     <span className="text-3xl font-extrabold text-foreground">{t.price}</span>
                     {t.period && <span className="text-sm text-muted-foreground">{t.period}</span>}
                   </div>
+                  {'earlyBird' in t && t.earlyBird && (
+                    <p className="text-xs text-primary font-medium mt-1">🎉 {t.earlyBird}</p>
+                  )}
                 </div>
                 <ul className="space-y-2">
                   {t.features.map(f => (
@@ -151,7 +154,6 @@ const Landing = () => {
       <footer className="border-t border-border/40 py-8">
         <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <GraviMagLogo size={20} />
             <span className="text-sm font-medium text-foreground">GraviMag Cloud</span>
             <span className="text-xs text-muted-foreground">by Geotech4All</span>
           </div>
