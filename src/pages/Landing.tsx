@@ -54,7 +54,6 @@ const Landing = () => {
       <header className="border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 h-14 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <GraviMagLogo size={28} />
             <span className="font-bold text-foreground">GraviMag Cloud</span>
           </div>
           <div className="flex items-center gap-2">
@@ -155,7 +154,6 @@ const Landing = () => {
       <footer className="border-t border-border/40 py-8">
         <div className="container mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
-            <GraviMagLogo size={20} />
             <span className="text-sm font-medium text-foreground">GraviMag Cloud</span>
             <span className="text-xs text-muted-foreground">by Geotech4All</span>
           </div>
