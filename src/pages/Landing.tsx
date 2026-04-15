@@ -127,6 +127,9 @@ const Landing = () => {
                     <span className="text-3xl font-extrabold text-foreground">{t.price}</span>
                     {t.period && <span className="text-sm text-muted-foreground">{t.period}</span>}
                   </div>
+                  {'earlyBird' in t && t.earlyBird && (
+                    <p className="text-xs text-primary font-medium mt-1">🎉 {t.earlyBird}</p>
+                  )}
                 </div>
                 <ul className="space-y-2">
                   {t.features.map(f => (
