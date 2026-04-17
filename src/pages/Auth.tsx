@@ -156,6 +156,37 @@ const Auth = () => {
             <TabsContent value="signup">
               <CardContent className="space-y-4 pt-2">
                 <form onSubmit={handleSignUp} className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Account Type</Label>
+                    <ToggleGroup
+                      type="single"
+                      value={accountType}
+                      onValueChange={(v) => v && setAccountType(v as 'individual' | 'institution')}
+                      className="grid grid-cols-2 gap-2"
+                    >
+                      <ToggleGroupItem
+                        value="individual"
+                        className="flex-col h-auto py-2 gap-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground border"
+                      >
+                        <User className="h-4 w-4" />
+                        <span className="text-xs font-medium">Individual</span>
+                      </ToggleGroupItem>
+                      <ToggleGroupItem
+                        value="institution"
+                        className="flex-col h-auto py-2 gap-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground border"
+                      >
+                        <GraduationCap className="h-4 w-4" />
+                        <span className="text-xs font-medium">Institution</span>
+                      </ToggleGroupItem>
+                    </ToggleGroup>
+                    {accountType === 'institution' && (
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Badge variant="secondary" className="h-4 px-1 text-[9px]">FREE</Badge>
+                        Unlimited projects for verified academic institutions
+                      </p>
+                    )}
+                  </div>
+
                   <div>
                     <Label className="text-xs">Full Name</Label>
                     <div className="relative">
@@ -163,13 +194,55 @@ const Auth = () => {
                       <Input value={fullName} onChange={e => setFullName(e.target.value)} className="pl-9 h-9" placeholder="Your Name" required />
                     </div>
                   </div>
+
+                  {accountType === 'institution' && (
+                    <div>
+                      <Label className="text-xs">Institution Name</Label>
+                      <div className="relative">
+                        <Building2 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          value={institutionName}
+                          onChange={e => setInstitutionName(e.target.value)}
+                          className="pl-9 h-9"
+                          placeholder="University of Example"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <div>
-                    <Label className="text-xs">Email</Label>
+                    <Label className="text-xs">
+                      {accountType === 'institution' ? 'Academic Email' : 'Email'}
+                    </Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} className="pl-9 h-9" placeholder="you@example.com" required />
+                      <Input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        className="pl-9 h-9 pr-9"
+                        placeholder={accountType === 'institution' ? 'you@university.edu' : 'you@example.com'}
+                        required
+                      />
+                      {accountType === 'institution' && email.length > 3 && (
+                        academicDetected
+                          ? <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-green-600" />
+                          : <AlertCircle className="absolute right-3 top-2.5 h-4 w-4 text-destructive" />
+                      )}
                     </div>
+                    {institutionInvalid && (
+                      <p className="text-[10px] text-destructive mt-1">
+                        Use an academic email (.edu, .ac.uk, .edu.ng, .ac.za, etc.)
+                      </p>
+                    )}
+                    {accountType === 'institution' && academicDetected && (
+                      <p className="text-[10px] text-green-600 mt-1 flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> Academic domain verified — auto-approved
+                      </p>
+                    )}
                   </div>
+
                   <div>
                     <Label className="text-xs">Password</Label>
                     <div className="relative">
@@ -177,8 +250,9 @@ const Auth = () => {
                       <Input type="password" value={password} onChange={e => setPassword(e.target.value)} className="pl-9 h-9" placeholder="Min. 6 characters" required minLength={6} />
                     </div>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Create Account
+                  <Button type="submit" className="w-full" disabled={loading || institutionInvalid}>
+                    {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                    {accountType === 'institution' ? 'Create Institution Account' : 'Create Account'}
                   </Button>
                 </form>
                 <div className="relative">
