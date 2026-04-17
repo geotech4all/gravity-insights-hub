@@ -25,6 +25,11 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [accountType, setAccountType] = useState<'individual' | 'institution'>('individual');
+  const [institutionName, setInstitutionName] = useState('');
+
+  const academicDetected = useMemo(() => isAcademicEmail(email), [email]);
+  const institutionInvalid = accountType === 'institution' && email.length > 3 && !academicDetected;
 
   useEffect(() => {
     if (user) navigate('/', { replace: true });
@@ -32,12 +37,20 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (accountType === 'institution' && !academicDetected) {
+      toast.error('Institution signup requires an academic email (.edu, .ac.uk, .edu.ng, etc.)');
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: {
+          full_name: fullName,
+          account_type: accountType,
+          institution_name: accountType === 'institution' ? institutionName : null,
+        },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -45,7 +58,11 @@ const Auth = () => {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success('Check your email to confirm your account!');
+      toast.success(
+        accountType === 'institution'
+          ? 'Account created! Your institution workspace is auto-verified with free unlimited access. Check your email to confirm.'
+          : 'Check your email to confirm your account!'
+      );
     }
   };
 
