@@ -7,11 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Building2, GraduationCap, CheckCircle2, AlertCircle } from 'lucide-react';
 import GraviMagLogo from '@/components/GraviMagLogo';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+
+const ACADEMIC_REGEX = /\.(edu|ac\.[a-z]{2,3}|edu\.[a-z]{2,3})$/i;
+const isAcademicEmail = (email: string) => ACADEMIC_REGEX.test(email.trim().toLowerCase());
 
 const Auth = () => {
   const navigate = useNavigate();
