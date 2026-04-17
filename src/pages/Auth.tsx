@@ -227,7 +227,7 @@ const Auth = () => {
                       />
                       {accountType === 'institution' && email.length > 3 && (
                         academicDetected
-                          ? <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-green-600" />
+                          ? <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-success" />
                           : <AlertCircle className="absolute right-3 top-2.5 h-4 w-4 text-destructive" />
                       )}
                     </div>
@@ -237,7 +237,7 @@ const Auth = () => {
                       </p>
                     )}
                     {accountType === 'institution' && academicDetected && (
-                      <p className="text-[10px] text-green-600 mt-1 flex items-center gap-1">
+                      <p className="text-[10px] text-success mt-1 flex items-center gap-1">
                         <CheckCircle2 className="h-3 w-3" /> Academic domain verified — auto-approved
                       </p>
                     )}
