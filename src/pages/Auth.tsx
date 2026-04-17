@@ -7,11 +7,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Mail, Lock, User, Loader2 } from 'lucide-react';
+import { Mail, Lock, User, Loader2, Building2, GraduationCap, CheckCircle2, AlertCircle } from 'lucide-react';
 import GraviMagLogo from '@/components/GraviMagLogo';
 import { useAuth } from '@/hooks/useAuth';
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
+
+const ACADEMIC_REGEX = /\.(edu|ac\.[a-z]{2,3}|edu\.[a-z]{2,3})$/i;
+const isAcademicEmail = (email: string) => ACADEMIC_REGEX.test(email.trim().toLowerCase());
 
 const Auth = () => {
   const navigate = useNavigate();
@@ -20,6 +25,11 @@ const Auth = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [accountType, setAccountType] = useState<'individual' | 'institution'>('individual');
+  const [institutionName, setInstitutionName] = useState('');
+
+  const academicDetected = useMemo(() => isAcademicEmail(email), [email]);
+  const institutionInvalid = accountType === 'institution' && email.length > 3 && !academicDetected;
 
   useEffect(() => {
     if (user) navigate('/', { replace: true });
@@ -27,12 +37,20 @@ const Auth = () => {
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (accountType === 'institution' && !academicDetected) {
+      toast.error('Institution signup requires an academic email (.edu, .ac.uk, .edu.ng, etc.)');
+      return;
+    }
     setLoading(true);
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { full_name: fullName },
+        data: {
+          full_name: fullName,
+          account_type: accountType,
+          institution_name: accountType === 'institution' ? institutionName : null,
+        },
         emailRedirectTo: window.location.origin,
       },
     });
@@ -40,7 +58,11 @@ const Auth = () => {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success('Check your email to confirm your account!');
+      toast.success(
+        accountType === 'institution'
+          ? 'Account created! Your institution workspace is auto-verified with free unlimited access. Check your email to confirm.'
+          : 'Check your email to confirm your account!'
+      );
     }
   };
 
@@ -134,6 +156,37 @@ const Auth = () => {
             <TabsContent value="signup">
               <CardContent className="space-y-4 pt-2">
                 <form onSubmit={handleSignUp} className="space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Account Type</Label>
+                    <ToggleGroup
+                      type="single"
+                      value={accountType}
+                      onValueChange={(v) => v && setAccountType(v as 'individual' | 'institution')}
+                      className="grid grid-cols-2 gap-2"
+                    >
+                      <ToggleGroupItem
+                        value="individual"
+                        className="flex-col h-auto py-2 gap-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground border"
+                      >
+                        <User className="h-4 w-4" />
+                        <span className="text-xs font-medium">Individual</span>
+                      </ToggleGroupItem>
+                      <ToggleGroupItem
+                        value="institution"
+                        className="flex-col h-auto py-2 gap-1 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground border"
+                      >
+                        <GraduationCap className="h-4 w-4" />
+                        <span className="text-xs font-medium">Institution</span>
+                      </ToggleGroupItem>
+                    </ToggleGroup>
+                    {accountType === 'institution' && (
+                      <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                        <Badge variant="secondary" className="h-4 px-1 text-[9px]">FREE</Badge>
+                        Unlimited projects for verified academic institutions
+                      </p>
+                    )}
+                  </div>
+
                   <div>
                     <Label className="text-xs">Full Name</Label>
                     <div className="relative">
@@ -141,13 +194,55 @@ const Auth = () => {
                       <Input value={fullName} onChange={e => setFullName(e.target.value)} className="pl-9 h-9" placeholder="Your Name" required />
                     </div>
                   </div>
+
+                  {accountType === 'institution' && (
+                    <div>
+                      <Label className="text-xs">Institution Name</Label>
+                      <div className="relative">
+                        <Building2 className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          value={institutionName}
+                          onChange={e => setInstitutionName(e.target.value)}
+                          className="pl-9 h-9"
+                          placeholder="University of Example"
+                          required
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   <div>
-                    <Label className="text-xs">Email</Label>
+                    <Label className="text-xs">
+                      {accountType === 'institution' ? 'Academic Email' : 'Email'}
+                    </Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                      <Input type="email" value={email} onChange={e => setEmail(e.target.value)} className="pl-9 h-9" placeholder="you@example.com" required />
+                      <Input
+                        type="email"
+                        value={email}
+                        onChange={e => setEmail(e.target.value)}
+                        className="pl-9 h-9 pr-9"
+                        placeholder={accountType === 'institution' ? 'you@university.edu' : 'you@example.com'}
+                        required
+                      />
+                      {accountType === 'institution' && email.length > 3 && (
+                        academicDetected
+                          ? <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-success" />
+                          : <AlertCircle className="absolute right-3 top-2.5 h-4 w-4 text-destructive" />
+                      )}
                     </div>
+                    {institutionInvalid && (
+                      <p className="text-[10px] text-destructive mt-1">
+                        Use an academic email (.edu, .ac.uk, .edu.ng, .ac.za, etc.)
+                      </p>
+                    )}
+                    {accountType === 'institution' && academicDetected && (
+                      <p className="text-[10px] text-success mt-1 flex items-center gap-1">
+                        <CheckCircle2 className="h-3 w-3" /> Academic domain verified — auto-approved
+                      </p>
+                    )}
                   </div>
+
                   <div>
                     <Label className="text-xs">Password</Label>
                     <div className="relative">
@@ -155,8 +250,9 @@ const Auth = () => {
                       <Input type="password" value={password} onChange={e => setPassword(e.target.value)} className="pl-9 h-9" placeholder="Min. 6 characters" required minLength={6} />
                     </div>
                   </div>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />} Create Account
+                  <Button type="submit" className="w-full" disabled={loading || institutionInvalid}>
+                    {loading && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                    {accountType === 'institution' ? 'Create Institution Account' : 'Create Account'}
                   </Button>
                 </form>
                 <div className="relative">
