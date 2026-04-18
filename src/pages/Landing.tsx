@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import GraviMagLogo from '@/components/GraviMagLogo';
 import heroDashboard from '@/assets/hero-dashboard.jpg';
+import heroField from '@/assets/hero-field.jpg';
 
 import {
   BarChart3, Globe, Share2, Shield, Zap, Check, ArrowRight,
@@ -77,52 +78,44 @@ const Landing = () => {
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="relative overflow-hidden">
-        {/* Decorative background */}
-        <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[1000px] rounded-full bg-primary/5 blur-3xl" />
-          <div className="absolute top-40 right-0 w-[400px] h-[400px] rounded-full bg-primary/10 blur-3xl" />
-        </div>
+      {/* Hero — full-bleed mission */}
+      <section className="relative h-[calc(100vh-4rem)] min-h-[560px] max-h-[820px] w-full overflow-hidden">
+        <img
+          src={heroField}
+          alt="Geophysicist conducting a gravity survey in the field"
+          width={1920}
+          height={1080}
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        {/* Gradient overlay for legibility */}
+        <div className="absolute inset-0 bg-gradient-to-r from-background/95 via-background/70 to-background/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent" />
 
-        <div className="container mx-auto px-4 pt-20 pb-12 text-center max-w-4xl">
-          <Badge variant="outline" className="gap-1.5 border-primary/30 bg-primary/5 text-primary mb-6">
-            <Sparkles className="h-3 w-3" /> Now in Public Beta · Free for Universities
-          </Badge>
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-foreground leading-[1.05]">
-            Geophysical processing,<br />
-            <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-              built for the cloud.
-            </span>
-          </h1>
-          <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mt-6 leading-relaxed">
-            Process gravity and magnetic survey data with industry-standard corrections.
-            Visualize, interpret, and report — without ever installing desktop software.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 mt-8">
-            <Button size="lg" onClick={() => navigate('/auth')} className="gap-2 h-12 px-7 text-base">
-              Start Free <ArrowRight className="h-4 w-4" />
-            </Button>
-            <Button size="lg" variant="outline" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="h-12 px-7 text-base">
-              See Features
-            </Button>
-          </div>
-          <p className="text-xs text-muted-foreground mt-4">No credit card required · 5 free projects · Cancel anytime</p>
-        </div>
-
-        {/* Hero product preview */}
-        <div className="container mx-auto px-4 pb-20">
-          <div className="relative max-w-6xl mx-auto">
-            <div className="absolute -inset-4 bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 rounded-2xl blur-2xl" />
-            <div className="relative rounded-xl border border-border/60 bg-card shadow-2xl overflow-hidden">
-              <img
-                src={heroDashboard}
-                alt="GraviMag Cloud dashboard preview"
-                width={1920}
-                height={1080}
-                className="w-full h-auto"
-              />
+        <div className="relative h-full container mx-auto px-4 flex items-center">
+          <div className="max-w-2xl space-y-6">
+            <p className="text-xs font-bold tracking-[0.2em] text-primary uppercase">
+              Our Mission
+            </p>
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.05]">
+              Empowering geoscientists<br />
+              to map what lies <span className="text-primary">beneath</span>
+            </h1>
+            <p className="text-lg text-foreground/80 max-w-xl leading-relaxed">
+              GraviMag Cloud puts professional gravity and magnetic data processing
+              in the hands of every researcher, student, and exploration team —
+              from field survey to publication-ready interpretation.
+            </p>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-2">
+              <Button size="lg" onClick={() => navigate('/auth')} className="gap-2 h-12 px-7 text-base shadow-lg shadow-primary/20">
+                Start Free <ArrowRight className="h-4 w-4" />
+              </Button>
+              <Button size="lg" variant="outline" onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })} className="h-12 px-7 text-base bg-background/60 backdrop-blur">
+                Learn More
+              </Button>
             </div>
+            <p className="text-xs text-muted-foreground pt-1">
+              Free for universities · No credit card required
+            </p>
           </div>
         </div>
       </section>
