@@ -120,26 +120,6 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Trust strip */}
-      <section className="border-y border-border/40 bg-muted/20 py-10">
-        <div className="container mx-auto px-4 text-center">
-          <p className="text-xs uppercase tracking-widest text-muted-foreground font-medium mb-6">
-            Trusted by geoscientists at universities and exploration teams worldwide
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-muted-foreground/70 font-semibold text-sm">
-            <span>UNIVERSITY OF PORT HARCOURT</span>
-            <span>·</span>
-            <span>GEOTECH4ALL</span>
-            <span>·</span>
-            <span>NIGERIAN GEOLOGICAL SURVEY</span>
-            <span>·</span>
-            <span>OAU GEOPHYSICS</span>
-            <span>·</span>
-            <span>UNILAG</span>
-          </div>
-        </div>
-      </section>
-
       {/* Features */}
       <section id="features" className="container mx-auto px-4 py-24">
         <div className="text-center mb-16 max-w-2xl mx-auto">
