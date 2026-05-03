@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, LayoutDashboard, Shield, User } from 'lucide-react';
+import { LogOut, LayoutDashboard, Shield, User, Building2 } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
 const Header = () => {
@@ -62,6 +62,9 @@ const Header = () => {
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => navigate('/profile')} className="gap-2 cursor-pointer">
                   <User className="h-3.5 w-3.5" /> Profile Settings
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/organization')} className="gap-2 cursor-pointer">
+                  <Building2 className="h-3.5 w-3.5" /> Organization
                 </DropdownMenuItem>
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate('/admin')} className="gap-2 cursor-pointer">

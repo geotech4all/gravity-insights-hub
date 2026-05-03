@@ -12,6 +12,7 @@ import Dashboard from "./pages/Dashboard";
 import AdminDashboard from "./pages/AdminDashboard";
 import ProfileSettings from "./pages/ProfileSettings";
 import Landing from "./pages/Landing";
+import OrganizationDashboard from "./pages/OrganizationDashboard";
 import TermsOfService from "./pages/TermsOfService";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import NotFound from "./pages/NotFound";
@@ -35,6 +36,8 @@ const App = () => (
             <Route path="/editor" element={<ProtectedRoute><Index /></ProtectedRoute>} />
             <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfileSettings /></ProtectedRoute>} />
+            <Route path="/organization" element={<ProtectedRoute><OrganizationDashboard /></ProtectedRoute>} />
+            <Route path="/organization/:orgId" element={<ProtectedRoute><OrganizationDashboard /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
