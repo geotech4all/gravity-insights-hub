@@ -175,10 +175,26 @@ const Dashboard = () => {
       <Header />
       <main className="container mx-auto px-4 py-6 space-y-6">
         <SubscriptionBanner />
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between flex-wrap gap-3">
           <div>
-            <h2 className="text-xl font-bold text-foreground">My Projects</h2>
-            <p className="text-sm text-muted-foreground">Cloud-saved gravity & magnetic surveys</p>
+            <div className="flex items-center gap-2 flex-wrap">
+              <h2 className="text-xl font-bold text-foreground">Projects</h2>
+              {activeOrg && (
+                <Badge variant="outline" className="gap-1 text-xs">
+                  {activeOrg.type === 'institution'
+                    ? <GraduationCap className="h-3 w-3" />
+                    : <Building2 className="h-3 w-3" />}
+                  {activeOrg.name}
+                  {isPersonalWorkspace && <span className="text-muted-foreground ml-1">(personal)</span>}
+                </Badge>
+              )}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {activeOrg
+                ? `Cloud-saved surveys for ${activeOrg.name}`
+                : 'Cloud-saved gravity & magnetic surveys'}
+              {orgs.length > 1 && ' · use the org switcher in the header to change context'}
+            </p>
           </div>
           <Button onClick={handleNewProject} className="gap-1.5">
             <Plus className="h-4 w-4" /> New Project
