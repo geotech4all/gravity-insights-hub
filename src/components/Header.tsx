@@ -2,16 +2,18 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+import { useActiveOrg } from '@/hooks/useActiveOrg';
 
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { LogOut, LayoutDashboard, Shield, User, Building2 } from 'lucide-react';
+import { LogOut, LayoutDashboard, Shield, User, Building2, GraduationCap, Check, ChevronDown } from 'lucide-react';
 import NotificationBell from './NotificationBell';
 
 const Header = () => {
   const { user, signOut } = useAuth();
   const navigate = useNavigate();
+  const { orgs, activeOrg, setActiveOrgId } = useActiveOrg();
   const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
@@ -40,6 +42,43 @@ const Header = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          {user && orgs.length > 0 && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="sm" className="h-8 gap-1.5 text-primary-foreground hover:bg-primary-foreground/20 max-w-[200px]">
+                  {activeOrg?.type === 'institution'
+                    ? <GraduationCap className="h-3.5 w-3.5 shrink-0" />
+                    : <Building2 className="h-3.5 w-3.5 shrink-0" />}
+                  <span className="truncate text-xs font-medium">{activeOrg?.name || 'Select org'}</span>
+                  <ChevronDown className="h-3 w-3 shrink-0 opacity-70" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-64">
+                <DropdownMenuLabel className="text-xs text-muted-foreground">Switch organization</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {orgs.map(o => (
+                  <DropdownMenuItem
+                    key={o.id}
+                    onClick={() => setActiveOrgId(o.id)}
+                    className="gap-2 cursor-pointer"
+                  >
+                    {o.type === 'institution'
+                      ? <GraduationCap className="h-3.5 w-3.5 text-muted-foreground" />
+                      : <Building2 className="h-3.5 w-3.5 text-muted-foreground" />}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm truncate">{o.name}</p>
+                      <p className="text-[10px] text-muted-foreground capitalize">{o.role} · {o.tier}</p>
+                    </div>
+                    {o.id === activeOrg?.id && <Check className="h-3.5 w-3.5 text-primary" />}
+                  </DropdownMenuItem>
+                ))}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/organization')} className="gap-2 cursor-pointer text-xs">
+                  <Building2 className="h-3.5 w-3.5" /> Manage organization
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
           {user && <NotificationBell />}
           {user && (
             <DropdownMenu>
