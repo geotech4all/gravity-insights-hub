@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useSubscription } from '@/hooks/useSubscription';
+import { useActiveOrg } from '@/hooks/useActiveOrg';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { Plus, FolderOpen, Trash2, Clock, Layers, Magnet, Search, Loader2, Users } from 'lucide-react';
+import { Plus, FolderOpen, Trash2, Clock, Layers, Magnet, Search, Loader2, Users, Building2, GraduationCap } from 'lucide-react';
 import Header from '@/components/Header';
 import ShareProjectDialog from '@/components/ShareProjectDialog';
 import SubscriptionBanner from '@/components/SubscriptionBanner';
@@ -31,26 +33,45 @@ const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { canCreateProject } = useSubscription();
+  const { activeOrg, activeOrgId, orgs } = useActiveOrg();
   const [projects, setProjects] = useState<CloudProject[]>([]);
   const [sharedProjects, setSharedProjects] = useState<SharedProject[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
+  // Treat the user's personal workspace (company org they own) as the bucket for legacy projects (org_id IS NULL).
+  const isPersonalWorkspace =
+    !!activeOrg && activeOrg.type === 'company' && activeOrg.role === 'owner';
+
   useEffect(() => {
-    if (user) {
+    if (user && activeOrgId !== undefined) {
       fetchProjects();
       logActivity('dashboard_view');
     }
-  }, [user]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, activeOrgId]);
 
   const fetchProjects = async () => {
     setLoading(true);
+
+    let ownQuery = supabase
+      .from('projects')
+      .select('id, name, description, data_mode, updated_at, created_at, org_id, user_id')
+      .order('updated_at', { ascending: false });
+
+    if (activeOrgId) {
+      if (isPersonalWorkspace) {
+        // Show org projects + the user's legacy projects (no org)
+        ownQuery = ownQuery.or(`org_id.eq.${activeOrgId},and(org_id.is.null,user_id.eq.${user!.id})`);
+      } else {
+        ownQuery = ownQuery.eq('org_id', activeOrgId);
+      }
+    } else {
+      ownQuery = ownQuery.eq('user_id', user!.id);
+    }
+
     const [ownRes, sharedRes] = await Promise.all([
-      supabase
-        .from('projects')
-        .select('id, name, description, data_mode, updated_at, created_at')
-        .eq('user_id', user!.id)
-        .order('updated_at', { ascending: false }),
+      ownQuery,
       supabase
         .from('project_shares')
         .select('project_id, permission')
@@ -69,6 +90,8 @@ const Dashboard = () => {
         permission: sharedRes.data!.find((s: any) => s.project_id === p.id)?.permission || 'viewer',
       }));
       setSharedProjects(mapped);
+    } else {
+      setSharedProjects([]);
     }
     setLoading(false);
   };
