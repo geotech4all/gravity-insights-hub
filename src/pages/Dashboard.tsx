@@ -23,6 +23,8 @@ interface CloudProject {
   data_mode: string;
   updated_at: string;
   created_at: string;
+  org_id?: string | null;
+  user_id?: string;
 }
 
 interface SharedProject extends CloudProject {
