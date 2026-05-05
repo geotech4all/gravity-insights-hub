@@ -19,12 +19,13 @@ export async function saveCloudProject(
   name: string,
   dataMode: string,
   data: CloudProjectData,
-  description = ''
+  description = '',
+  orgId: string | null = null,
 ) {
   const user = (await supabase.auth.getUser()).data.user;
   if (!user) throw new Error('Not authenticated');
 
-  const payload = {
+  const payload: any = {
     user_id: user.id,
     name,
     description,
@@ -32,6 +33,7 @@ export async function saveCloudProject(
     project_data: data as any,
     updated_at: new Date().toISOString(),
   };
+  if (orgId) payload.org_id = orgId;
 
   if (projectId) {
     const { error } = await supabase.from('projects').update(payload).eq('id', projectId);

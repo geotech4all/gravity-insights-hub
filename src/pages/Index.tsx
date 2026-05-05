@@ -35,6 +35,7 @@ import { detectAndParse, type ValidationError } from '@/lib/dataManager';
 import { detectAndParseMagnetic } from '@/lib/magneticParser';
 import { processMagneticData, DEFAULT_MAG_PARAMS, type RawMagStation, type ProcessedMagStation, type MagProcessingParams } from '@/lib/magneticCalculations';
 import { saveCloudProject, loadCloudProject, type CloudProjectData } from '@/lib/cloudProjects';
+import { useActiveOrg } from '@/hooks/useActiveOrg';
 import { logActivity } from '@/lib/activityLogger';
 import BatchUpload, { type BatchFileResult } from '@/components/BatchUpload';
 
@@ -43,6 +44,7 @@ type DataMode = 'gravity' | 'magnetic';
 const Index = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const { activeOrgId } = useActiveOrg();
   const projectId = searchParams.get('project');
   const [cloudId, setCloudId] = useState<string | null>(projectId);
   const [saving, setSaving] = useState(false);
@@ -150,7 +152,7 @@ const Index = () => {
       const data: CloudProjectData = mode === 'gravity'
         ? { stations, calibration, knownAbsValue, baseStationId, density }
         : { magStations, magParams };
-      const id = await saveCloudProject(cloudId, projectName, mode, data);
+      const id = await saveCloudProject(cloudId, projectName, mode, data, '', activeOrgId);
       setCloudId(id);
       // Update URL without reload
       window.history.replaceState(null, '', `/editor?project=${id}`);
@@ -161,7 +163,7 @@ const Index = () => {
       console.error(err);
     }
     setSaving(false);
-  }, [cloudId, projectName, mode, stations, calibration, knownAbsValue, baseStationId, density, magStations, magParams]);
+  }, [cloudId, projectName, mode, stations, calibration, knownAbsValue, baseStationId, density, magStations, magParams, activeOrgId]);
 
   // Load cloud project on mount
   useEffect(() => {
