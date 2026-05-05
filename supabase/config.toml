@@ -1,1 +1,7 @@
 project_id = "rblaayhltvzpghqtoufg"
+
+[functions.invite-lookup]
+verify_jwt = false
+
+[functions.invite-accept]
+verify_jwt = false
