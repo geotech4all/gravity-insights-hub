@@ -96,9 +96,9 @@ const Landing = () => {
             <p className="text-xs font-bold tracking-[0.2em] text-primary uppercase">
               Our Mission
             </p>
-            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground leading-[1.05]">
+            <h1 className="font-[Fraunces,Georgia,serif] text-5xl sm:text-6xl lg:text-7xl font-normal tracking-tight text-foreground leading-[1.02]" style={{ fontOpticalSizing: 'auto' }}>
               Empowering geoscientists<br />
-              to map what lies <span className="text-primary">beneath</span>
+              to map what lies <em className="text-primary not-italic font-medium">beneath</em>
             </h1>
             <p className="text-lg text-foreground/80 max-w-xl leading-relaxed">
               GraviMag Cloud puts professional gravity and magnetic data processing

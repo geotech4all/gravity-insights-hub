@@ -299,13 +299,24 @@ const OrganizationDashboard = () => {
               <CardHeader className="flex flex-row items-center justify-between space-y-0">
                 <div>
                   <CardTitle>Team members</CardTitle>
-                  <CardDescription>People with access to this organization's projects</CardDescription>
+                  <CardDescription>
+                    {(() => {
+                      const limit = activeOrg.tier === 'free' ? 3 : activeOrg.tier === 'standard' ? 15 : null;
+                      return limit
+                        ? `${members.length} of ${limit} seats used on the ${TIER_LABEL[activeOrg.tier] || activeOrg.tier} plan`
+                        : `Unlimited seats on the ${TIER_LABEL[activeOrg.tier] || activeOrg.tier} plan`;
+                    })()}
+                  </CardDescription>
                 </div>
-                {isAdmin && (
-                  <Button size="sm" onClick={() => setInviteOpen(true)} className="gap-1.5">
-                    <Plus className="h-3.5 w-3.5" /> Invite
-                  </Button>
-                )}
+                {isAdmin && (() => {
+                  const limit = activeOrg.tier === 'free' ? 3 : activeOrg.tier === 'standard' ? 15 : Infinity;
+                  const full = members.length >= limit;
+                  return (
+                    <Button size="sm" onClick={() => setInviteOpen(true)} className="gap-1.5" disabled={full} title={full ? 'Seat limit reached — upgrade to invite more' : undefined}>
+                      <Plus className="h-3.5 w-3.5" /> Invite
+                    </Button>
+                  );
+                })()}
               </CardHeader>
               <CardContent className="space-y-2">
                 {loadingData && <p className="text-sm text-muted-foreground py-4 text-center">Loading…</p>}
