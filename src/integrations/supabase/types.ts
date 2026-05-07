@@ -330,10 +330,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_org_member_count: { Args: { _org_id: string }; Returns: number }
+      get_org_project_count: { Args: { _org_id: string }; Returns: number }
+      get_org_project_limit: { Args: { _org_id: string }; Returns: number }
       get_org_role: {
         Args: { _org_id: string; _user_id: string }
         Returns: Database["public"]["Enums"]["org_role"]
       }
+      get_org_seat_limit: { Args: { _org_id: string }; Returns: number }
       get_project_limit: { Args: { _user_id: string }; Returns: number }
       get_user_project_count: { Args: { _user_id: string }; Returns: number }
       has_org_permission: {
