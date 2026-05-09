@@ -193,6 +193,46 @@ const OrganizationDashboard = () => {
       toast.error(error.message);
     } else {
       toast.success('Organization updated');
+      logOrgAudit(activeOrg.id, 'org_settings_updated', {
+        metadata: { name: orgName.trim(), slug: orgSlug.trim(), country: orgCountry.trim() || null },
+      });
+      refreshOrgs();
+      loadData();
+    }
+  };
+
+  const handleLogoUpload = async (file: File) => {
+    if (!isAdmin || !file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Logo must be under 2MB');
+      return;
+    }
+    setUploadingLogo(true);
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+    const path = `${activeOrg.id}/logo-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from('org-logos')
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) {
+      setUploadingLogo(false);
+      toast.error(upErr.message);
+      return;
+    }
+    const { data: pub } = supabase.storage.from('org-logos').getPublicUrl(path);
+    const { error: dbErr } = await supabase
+      .from('organizations')
+      .update({ logo_url: pub.publicUrl })
+      .eq('id', activeOrg.id);
+    setUploadingLogo(false);
+    if (dbErr) {
+      toast.error(dbErr.message);
+    } else {
+      toast.success('Logo updated');
+      logOrgAudit(activeOrg.id, 'org_logo_updated', { metadata: { path } });
       refreshOrgs();
     }
   };
@@ -216,6 +256,7 @@ const OrganizationDashboard = () => {
       toast.error(error.message);
     } else {
       toast.success(`Invite created for ${email}`);
+      logOrgAudit(activeOrg.id, 'invite_created', { targetEmail: email, metadata: { role: inviteRole } });
       setInviteEmail('');
       setInviteRole('viewer');
       setInviteOpen(false);
@@ -230,28 +271,49 @@ const OrganizationDashboard = () => {
   };
 
   const handleRevokeInvite = async (id: string) => {
+    const inv = invites.find(i => i.id === id);
     const { error } = await supabase.from('organization_invites').delete().eq('id', id);
     if (error) toast.error(error.message);
-    else { toast.success('Invite revoked'); loadData(); }
+    else {
+      toast.success('Invite revoked');
+      if (inv) logOrgAudit(activeOrg.id, 'invite_revoked', { targetEmail: inv.email });
+      loadData();
+    }
   };
 
   const handleChangeRole = async (memberId: string, newRole: OrgRole) => {
+    const m = members.find(x => x.id === memberId);
     const { error } = await supabase
       .from('organization_members')
       .update({ role: newRole })
       .eq('id', memberId);
     if (error) toast.error(error.message);
-    else { toast.success('Role updated'); loadData(); }
+    else {
+      toast.success('Role updated');
+      if (m) logOrgAudit(activeOrg.id, 'member_role_changed', {
+        targetEmail: m.display_name || m.user_id,
+        metadata: { from: m.role, to: newRole },
+      });
+      loadData();
+    }
   };
 
   const handleRemoveMember = async () => {
     if (!memberToRemove) return;
+    const removed = memberToRemove;
     const { error } = await supabase
       .from('organization_members')
       .delete()
-      .eq('id', memberToRemove.id);
+      .eq('id', removed.id);
     if (error) toast.error(error.message);
-    else { toast.success('Member removed'); loadData(); }
+    else {
+      toast.success('Member removed');
+      logOrgAudit(activeOrg.id, 'member_removed', {
+        targetEmail: removed.display_name || removed.user_id,
+        metadata: { role: removed.role },
+      });
+      loadData();
+    }
     setMemberToRemove(null);
   };
 
