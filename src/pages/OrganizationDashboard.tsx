@@ -73,7 +73,9 @@ const OrganizationDashboard = () => {
 
   const [members, setMembers] = useState<Member[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Settings form
   const [orgName, setOrgName] = useState('');
