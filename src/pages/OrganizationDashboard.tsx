@@ -135,7 +135,7 @@ const OrganizationDashboard = () => {
       })));
     }
     if (invitesRes.data) setInvites(invitesRes.data as Invite[]);
-    if (auditRes.data) setAuditLogs(auditRes.data as AuditEntry[]);
+    if (auditRes.data) setAuditLogs(auditRes.data as unknown as AuditEntry[]);
 
     setLoadingData(false);
   }, [activeOrg]);
