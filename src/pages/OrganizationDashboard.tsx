@@ -18,7 +18,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Users, Mail, Settings, Trash2, Copy, Plus, Crown, Shield, Pencil, Eye, GraduationCap, Building2 } from 'lucide-react';
+import { Users, Mail, Settings, Trash2, Copy, Plus, Crown, Shield, Pencil, Eye, GraduationCap, Building2, Upload, ScrollText } from 'lucide-react';
+import { logOrgAudit } from '@/lib/orgAudit';
 
 const ROLE_META: Record<OrgRole, { label: string; icon: any; className: string }> = {
   owner:  { label: 'Owner',  icon: Crown,  className: 'bg-amber-500/10 text-amber-600 border-amber-500/30' },
@@ -51,6 +52,15 @@ interface Invite {
   accepted_at: string | null;
 }
 
+interface AuditEntry {
+  id: string;
+  actor_email: string | null;
+  action: string;
+  target_email: string | null;
+  metadata: any;
+  created_at: string;
+}
+
 const OrganizationDashboard = () => {
   const { orgId: paramOrgId } = useParams();
   const navigate = useNavigate();
@@ -63,7 +73,9 @@ const OrganizationDashboard = () => {
 
   const [members, setMembers] = useState<Member[]>([]);
   const [invites, setInvites] = useState<Invite[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditEntry[]>([]);
   const [loadingData, setLoadingData] = useState(true);
+  const [uploadingLogo, setUploadingLogo] = useState(false);
 
   // Settings form
   const [orgName, setOrgName] = useState('');
@@ -89,7 +101,7 @@ const OrganizationDashboard = () => {
 
     // Members + their profile data (two queries — RLS allows reading profiles for self only,
     // but we fetch profiles for all org members via a separate query that we control client-side)
-    const [membersRes, invitesRes] = await Promise.all([
+    const [membersRes, invitesRes, auditRes] = await Promise.all([
       supabase.from('organization_members')
         .select('id, user_id, role, created_at')
         .eq('org_id', activeOrg.id)
@@ -99,6 +111,11 @@ const OrganizationDashboard = () => {
         .eq('org_id', activeOrg.id)
         .is('accepted_at', null)
         .order('created_at', { ascending: false }),
+      supabase.from('org_audit_logs' as any)
+        .select('id, actor_email, action, target_email, metadata, created_at')
+        .eq('org_id', activeOrg.id)
+        .order('created_at', { ascending: false })
+        .limit(100),
     ]);
 
     if (membersRes.data) {
@@ -118,6 +135,7 @@ const OrganizationDashboard = () => {
       })));
     }
     if (invitesRes.data) setInvites(invitesRes.data as Invite[]);
+    if (auditRes.data) setAuditLogs(auditRes.data as unknown as AuditEntry[]);
 
     setLoadingData(false);
   }, [activeOrg]);
@@ -175,6 +193,46 @@ const OrganizationDashboard = () => {
       toast.error(error.message);
     } else {
       toast.success('Organization updated');
+      logOrgAudit(activeOrg.id, 'org_settings_updated', {
+        metadata: { name: orgName.trim(), slug: orgSlug.trim(), country: orgCountry.trim() || null },
+      });
+      refreshOrgs();
+      loadData();
+    }
+  };
+
+  const handleLogoUpload = async (file: File) => {
+    if (!isAdmin || !file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please select an image file');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Logo must be under 2MB');
+      return;
+    }
+    setUploadingLogo(true);
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'png';
+    const path = `${activeOrg.id}/logo-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from('org-logos')
+      .upload(path, file, { upsert: true, contentType: file.type });
+    if (upErr) {
+      setUploadingLogo(false);
+      toast.error(upErr.message);
+      return;
+    }
+    const { data: pub } = supabase.storage.from('org-logos').getPublicUrl(path);
+    const { error: dbErr } = await supabase
+      .from('organizations')
+      .update({ logo_url: pub.publicUrl })
+      .eq('id', activeOrg.id);
+    setUploadingLogo(false);
+    if (dbErr) {
+      toast.error(dbErr.message);
+    } else {
+      toast.success('Logo updated');
+      logOrgAudit(activeOrg.id, 'org_logo_updated', { metadata: { path } });
       refreshOrgs();
     }
   };
@@ -198,6 +256,7 @@ const OrganizationDashboard = () => {
       toast.error(error.message);
     } else {
       toast.success(`Invite created for ${email}`);
+      logOrgAudit(activeOrg.id, 'invite_created', { targetEmail: email, metadata: { role: inviteRole } });
       setInviteEmail('');
       setInviteRole('viewer');
       setInviteOpen(false);
@@ -212,28 +271,49 @@ const OrganizationDashboard = () => {
   };
 
   const handleRevokeInvite = async (id: string) => {
+    const inv = invites.find(i => i.id === id);
     const { error } = await supabase.from('organization_invites').delete().eq('id', id);
     if (error) toast.error(error.message);
-    else { toast.success('Invite revoked'); loadData(); }
+    else {
+      toast.success('Invite revoked');
+      if (inv) logOrgAudit(activeOrg.id, 'invite_revoked', { targetEmail: inv.email });
+      loadData();
+    }
   };
 
   const handleChangeRole = async (memberId: string, newRole: OrgRole) => {
+    const m = members.find(x => x.id === memberId);
     const { error } = await supabase
       .from('organization_members')
       .update({ role: newRole })
       .eq('id', memberId);
     if (error) toast.error(error.message);
-    else { toast.success('Role updated'); loadData(); }
+    else {
+      toast.success('Role updated');
+      if (m) logOrgAudit(activeOrg.id, 'member_role_changed', {
+        targetEmail: m.display_name || m.user_id,
+        metadata: { from: m.role, to: newRole },
+      });
+      loadData();
+    }
   };
 
   const handleRemoveMember = async () => {
     if (!memberToRemove) return;
+    const removed = memberToRemove;
     const { error } = await supabase
       .from('organization_members')
       .delete()
-      .eq('id', memberToRemove.id);
+      .eq('id', removed.id);
     if (error) toast.error(error.message);
-    else { toast.success('Member removed'); loadData(); }
+    else {
+      toast.success('Member removed');
+      logOrgAudit(activeOrg.id, 'member_removed', {
+        targetEmail: removed.display_name || removed.user_id,
+        metadata: { role: removed.role },
+      });
+      loadData();
+    }
     setMemberToRemove(null);
   };
 
@@ -244,10 +324,12 @@ const OrganizationDashboard = () => {
         {/* Header card */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center">
-              {activeOrg.type === 'institution'
-                ? <GraduationCap className="h-7 w-7 text-primary" />
-                : <Building2 className="h-7 w-7 text-primary" />}
+            <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center overflow-hidden">
+              {activeOrg.logo_url
+                ? <img src={activeOrg.logo_url} alt={`${activeOrg.name} logo`} className="h-full w-full object-cover" />
+                : activeOrg.type === 'institution'
+                  ? <GraduationCap className="h-7 w-7 text-primary" />
+                  : <Building2 className="h-7 w-7 text-primary" />}
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
@@ -291,6 +373,7 @@ const OrganizationDashboard = () => {
             <TabsTrigger value="members" className="gap-1.5"><Users className="h-3.5 w-3.5" /> Members</TabsTrigger>
             <TabsTrigger value="invites" className="gap-1.5"><Mail className="h-3.5 w-3.5" /> Invites</TabsTrigger>
             <TabsTrigger value="settings" className="gap-1.5"><Settings className="h-3.5 w-3.5" /> Settings</TabsTrigger>
+            {isAdmin && <TabsTrigger value="audit" className="gap-1.5"><ScrollText className="h-3.5 w-3.5" /> Audit log</TabsTrigger>}
           </TabsList>
 
           {/* MEMBERS */}
@@ -438,6 +521,30 @@ const OrganizationDashboard = () => {
               </CardHeader>
               <CardContent className="space-y-4 max-w-xl">
                 <div className="space-y-2">
+                  <Label>Logo</Label>
+                  <div className="flex items-center gap-3">
+                    <div className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden border border-border">
+                      {activeOrg.logo_url
+                        ? <img src={activeOrg.logo_url} alt="Org logo" className="h-full w-full object-cover" />
+                        : <Building2 className="h-6 w-6 text-muted-foreground" />}
+                    </div>
+                    {isAdmin && (
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                        <Button type="button" variant="outline" size="sm" disabled={uploadingLogo} asChild>
+                          <span><Upload className="h-3.5 w-3.5 mr-1.5" />{uploadingLogo ? 'Uploading…' : (activeOrg.logo_url ? 'Replace logo' : 'Upload logo')}</span>
+                        </Button>
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                          className="hidden"
+                          onChange={(e) => e.target.files?.[0] && handleLogoUpload(e.target.files[0])}
+                        />
+                      </label>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, WebP or SVG. Max 2MB. Square images look best.</p>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="org-name">Name</Label>
                   <Input id="org-name" value={orgName} onChange={(e) => setOrgName(e.target.value)} disabled={!isAdmin} maxLength={120} />
                 </div>
@@ -465,6 +572,43 @@ const OrganizationDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* AUDIT LOG */}
+          {isAdmin && (
+            <TabsContent value="audit">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Audit log</CardTitle>
+                  <CardDescription>Recent activity in this organization (last 100 events).</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {loadingData && <p className="text-sm text-muted-foreground py-4 text-center">Loading…</p>}
+                  {!loadingData && auditLogs.length === 0 && (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No activity recorded yet.</p>
+                  )}
+                  {!loadingData && auditLogs.map(log => (
+                    <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg border border-border/60 text-sm">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <ScrollText className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground">
+                          <span className="capitalize">{log.action.replace(/_/g, ' ')}</span>
+                          {log.target_email && <span className="text-muted-foreground font-normal"> · {log.target_email}</span>}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {log.actor_email || 'system'} · {new Date(log.created_at).toLocaleString()}
+                        </p>
+                        {log.metadata && Object.keys(log.metadata).length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-1 font-mono truncate">{JSON.stringify(log.metadata)}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
 
