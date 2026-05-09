@@ -521,6 +521,30 @@ const OrganizationDashboard = () => {
               </CardHeader>
               <CardContent className="space-y-4 max-w-xl">
                 <div className="space-y-2">
+                  <Label>Logo</Label>
+                  <div className="flex items-center gap-3">
+                    <div className="h-16 w-16 rounded-lg bg-muted flex items-center justify-center overflow-hidden border border-border">
+                      {activeOrg.logo_url
+                        ? <img src={activeOrg.logo_url} alt="Org logo" className="h-full w-full object-cover" />
+                        : <Building2 className="h-6 w-6 text-muted-foreground" />}
+                    </div>
+                    {isAdmin && (
+                      <label className="inline-flex items-center gap-1.5 cursor-pointer">
+                        <Button type="button" variant="outline" size="sm" disabled={uploadingLogo} asChild>
+                          <span><Upload className="h-3.5 w-3.5 mr-1.5" />{uploadingLogo ? 'Uploading…' : (activeOrg.logo_url ? 'Replace logo' : 'Upload logo')}</span>
+                        </Button>
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp,image/svg+xml"
+                          className="hidden"
+                          onChange={(e) => e.target.files?.[0] && handleLogoUpload(e.target.files[0])}
+                        />
+                      </label>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground">PNG, JPG, WebP or SVG. Max 2MB. Square images look best.</p>
+                </div>
+                <div className="space-y-2">
                   <Label htmlFor="org-name">Name</Label>
                   <Input id="org-name" value={orgName} onChange={(e) => setOrgName(e.target.value)} disabled={!isAdmin} maxLength={120} />
                 </div>
