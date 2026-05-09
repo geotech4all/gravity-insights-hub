@@ -101,7 +101,7 @@ const OrganizationDashboard = () => {
 
     // Members + their profile data (two queries — RLS allows reading profiles for self only,
     // but we fetch profiles for all org members via a separate query that we control client-side)
-    const [membersRes, invitesRes] = await Promise.all([
+    const [membersRes, invitesRes, auditRes] = await Promise.all([
       supabase.from('organization_members')
         .select('id, user_id, role, created_at')
         .eq('org_id', activeOrg.id)
@@ -111,6 +111,11 @@ const OrganizationDashboard = () => {
         .eq('org_id', activeOrg.id)
         .is('accepted_at', null)
         .order('created_at', { ascending: false }),
+      supabase.from('org_audit_logs' as any)
+        .select('id, actor_email, action, target_email, metadata, created_at')
+        .eq('org_id', activeOrg.id)
+        .order('created_at', { ascending: false })
+        .limit(100),
     ]);
 
     if (membersRes.data) {
