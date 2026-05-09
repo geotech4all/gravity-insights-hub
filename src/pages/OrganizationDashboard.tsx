@@ -324,10 +324,12 @@ const OrganizationDashboard = () => {
         {/* Header card */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center">
-              {activeOrg.type === 'institution'
-                ? <GraduationCap className="h-7 w-7 text-primary" />
-                : <Building2 className="h-7 w-7 text-primary" />}
+            <div className="h-14 w-14 rounded-xl bg-primary/10 flex items-center justify-center overflow-hidden">
+              {activeOrg.logo_url
+                ? <img src={activeOrg.logo_url} alt={`${activeOrg.name} logo`} className="h-full w-full object-cover" />
+                : activeOrg.type === 'institution'
+                  ? <GraduationCap className="h-7 w-7 text-primary" />
+                  : <Building2 className="h-7 w-7 text-primary" />}
             </div>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
