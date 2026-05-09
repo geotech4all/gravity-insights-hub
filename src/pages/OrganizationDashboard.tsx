@@ -572,6 +572,43 @@ const OrganizationDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+
+          {/* AUDIT LOG */}
+          {isAdmin && (
+            <TabsContent value="audit">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Audit log</CardTitle>
+                  <CardDescription>Recent activity in this organization (last 100 events).</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  {loadingData && <p className="text-sm text-muted-foreground py-4 text-center">Loading…</p>}
+                  {!loadingData && auditLogs.length === 0 && (
+                    <p className="text-sm text-muted-foreground py-4 text-center">No activity recorded yet.</p>
+                  )}
+                  {!loadingData && auditLogs.map(log => (
+                    <div key={log.id} className="flex items-start gap-3 p-3 rounded-lg border border-border/60 text-sm">
+                      <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                        <ScrollText className="h-3.5 w-3.5 text-primary" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground">
+                          <span className="capitalize">{log.action.replace(/_/g, ' ')}</span>
+                          {log.target_email && <span className="text-muted-foreground font-normal"> · {log.target_email}</span>}
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {log.actor_email || 'system'} · {new Date(log.created_at).toLocaleString()}
+                        </p>
+                        {log.metadata && Object.keys(log.metadata).length > 0 && (
+                          <p className="text-xs text-muted-foreground mt-1 font-mono truncate">{JSON.stringify(log.metadata)}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          )}
         </Tabs>
       </div>
 
