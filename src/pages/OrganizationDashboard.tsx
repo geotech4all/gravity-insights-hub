@@ -52,6 +52,15 @@ interface Invite {
   accepted_at: string | null;
 }
 
+interface AuditEntry {
+  id: string;
+  actor_email: string | null;
+  action: string;
+  target_email: string | null;
+  metadata: any;
+  created_at: string;
+}
+
 const OrganizationDashboard = () => {
   const { orgId: paramOrgId } = useParams();
   const navigate = useNavigate();
