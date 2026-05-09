@@ -373,6 +373,7 @@ const OrganizationDashboard = () => {
             <TabsTrigger value="members" className="gap-1.5"><Users className="h-3.5 w-3.5" /> Members</TabsTrigger>
             <TabsTrigger value="invites" className="gap-1.5"><Mail className="h-3.5 w-3.5" /> Invites</TabsTrigger>
             <TabsTrigger value="settings" className="gap-1.5"><Settings className="h-3.5 w-3.5" /> Settings</TabsTrigger>
+            {isAdmin && <TabsTrigger value="audit" className="gap-1.5"><ScrollText className="h-3.5 w-3.5" /> Audit log</TabsTrigger>}
           </TabsList>
 
           {/* MEMBERS */}
