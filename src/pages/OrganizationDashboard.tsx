@@ -18,7 +18,8 @@ import {
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { Users, Mail, Settings, Trash2, Copy, Plus, Crown, Shield, Pencil, Eye, GraduationCap, Building2 } from 'lucide-react';
+import { Users, Mail, Settings, Trash2, Copy, Plus, Crown, Shield, Pencil, Eye, GraduationCap, Building2, Upload, ScrollText } from 'lucide-react';
+import { logOrgAudit } from '@/lib/orgAudit';
 
 const ROLE_META: Record<OrgRole, { label: string; icon: any; className: string }> = {
   owner:  { label: 'Owner',  icon: Crown,  className: 'bg-amber-500/10 text-amber-600 border-amber-500/30' },
