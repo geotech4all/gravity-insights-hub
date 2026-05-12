@@ -490,6 +490,19 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      get_email_send_log: {
+        Args: { _limit?: number }
+        Returns: {
+          created_at: string
+          error_message: string
+          id: string
+          message_id: string
+          metadata: Json
+          recipient_email: string
+          status: string
+          template_name: string
+        }[]
+      }
       get_org_member_count: { Args: { _org_id: string }; Returns: number }
       get_org_project_count: { Args: { _org_id: string }; Returns: number }
       get_org_project_limit: { Args: { _org_id: string }; Returns: number }
