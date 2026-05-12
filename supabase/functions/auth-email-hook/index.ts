@@ -36,7 +36,7 @@ const EMAIL_TEMPLATES: Record<string, React.ComponentType<any>> = {
 }
 
 // Configuration
-const SITE_NAME = "Gravity Insights Hub"
+const SITE_NAME = "GraviMag Cloud"
 const SENDER_DOMAIN = "notify.gravimagcloud.com"
 const ROOT_DOMAIN = "gravimagcloud.com"
 const FROM_DOMAIN = "notify.gravimagcloud.com" // Domain shown in From address (may be root or sender subdomain)
