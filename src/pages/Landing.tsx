@@ -185,7 +185,7 @@ const Landing = () => {
                 <GraduationCap className="h-3.5 w-3.5" /> For Universities
               </Badge>
               <h2 className="text-3xl sm:text-4xl font-bold text-foreground tracking-tight">
-                Free unlimited access for academic institutions
+                Free academic access for universities
               </h2>
               <p className="text-muted-foreground mt-4 leading-relaxed">
                 Sign up with your <code className="text-primary font-mono text-sm">.edu</code> or
