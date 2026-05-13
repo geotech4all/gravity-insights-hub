@@ -21,7 +21,7 @@ interface SubscriptionInfo {
 const PROJECT_LIMITS: Record<SubscriptionTier, number> = {
   free: 5,
   standard: 50,
-  academic: 999999,
+  academic: 50,
   enterprise: 999999,
 };
 
