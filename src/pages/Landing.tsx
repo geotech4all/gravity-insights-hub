@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import GraviMagLogo from '@/components/GraviMagLogo';
+import ReviewSection from '@/components/ReviewSection';
 import heroDashboard from '@/assets/hero-dashboard.jpg';
 import heroField from '@/assets/hero-field.jpg';
 
