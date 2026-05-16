@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Users, FolderOpen, Activity, Search, Loader2, Shield, ArrowLeft, Crown } from 'lucide-react';
+import { Users, FolderOpen, Activity, Search, Loader2, Shield, ArrowLeft, Crown, Star, Check, X, Trash2 } from 'lucide-react';
 
 interface UserProfile {
   user_id: string;
@@ -40,6 +40,16 @@ interface ActivityLog {
   created_at: string;
 }
 
+interface ReviewRow {
+  id: string;
+  user_id: string;
+  user_name: string;
+  rating: number;
+  comment: string;
+  approved: boolean;
+  created_at: string;
+}
+
 const TIER_BADGE: Record<string, string> = {
   free: 'bg-muted text-muted-foreground',
   standard: 'bg-primary/10 text-primary',
@@ -53,6 +63,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
@@ -69,14 +80,16 @@ const AdminDashboard = () => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [usersRes, projectsRes, logsRes] = await Promise.all([
+    const [usersRes, projectsRes, logsRes, reviewsRes] = await Promise.all([
       supabase.from('profiles').select('*').order('created_at', { ascending: false }),
       supabase.from('projects').select('id, name, user_id, data_mode, created_at, updated_at').order('updated_at', { ascending: false }),
       supabase.from('user_activity_logs').select('*').order('created_at', { ascending: false }).limit(200),
+      supabase.from('reviews').select('*').order('created_at', { ascending: false }),
     ]);
     setUsers((usersRes.data as any[]) || []);
     setProjects((projectsRes.data as ProjectRow[]) || []);
     setLogs((logsRes.data as ActivityLog[]) || []);
+    setReviews((reviewsRes.data as ReviewRow[]) || []);
     setLoading(false);
   };
 
@@ -95,6 +108,21 @@ const AdminDashboard = () => {
       });
     }
     toast.success(`Tier updated to ${newTier}. Email notification will be sent when email service is configured.`);
+  };
+
+  const handleReviewApprove = async (id: string, approved: boolean) => {
+    const { error } = await supabase.from('reviews').update({ approved }).eq('id', id);
+    if (error) { toast.error('Failed to update review'); return; }
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, approved } : r));
+    toast.success(approved ? 'Review approved' : 'Review unapproved');
+  };
+
+  const handleReviewDelete = async (id: string) => {
+    if (!confirm('Delete this review permanently?')) return;
+    const { error } = await supabase.from('reviews').delete().eq('id', id);
+    if (error) { toast.error('Failed to delete review'); return; }
+    setReviews(prev => prev.filter(r => r.id !== id));
+    toast.success('Review deleted');
   };
 
   if (isAdmin === null || loading) {
@@ -160,6 +188,12 @@ const AdminDashboard = () => {
             <TabsTrigger value="users" className="gap-1"><Users className="h-3.5 w-3.5" /> Users</TabsTrigger>
             <TabsTrigger value="projects" className="gap-1"><FolderOpen className="h-3.5 w-3.5" /> Projects</TabsTrigger>
             <TabsTrigger value="activity" className="gap-1"><Activity className="h-3.5 w-3.5" /> Activity</TabsTrigger>
+            <TabsTrigger value="reviews" className="gap-1">
+              <Star className="h-3.5 w-3.5" /> Reviews
+              {reviews.filter(r => !r.approved).length > 0 && (
+                <Badge variant="destructive" className="ml-1 h-4 px-1 text-[10px]">{reviews.filter(r => !r.approved).length}</Badge>
+              )}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-4">
@@ -255,6 +289,64 @@ const AdminDashboard = () => {
                         <TableCell className="text-sm">{log.user_email || log.user_id.slice(0, 8)}</TableCell>
                         <TableCell><Badge variant="secondary" className="capitalize">{log.action.replace(/_/g, ' ')}</Badge></TableCell>
                         <TableCell className="text-xs text-muted-foreground max-w-[200px] truncate">{JSON.stringify(log.metadata)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="reviews">
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Rating</TableHead>
+                      <TableHead>Comment</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reviews.length === 0 ? (
+                      <TableRow><TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">No reviews yet</TableCell></TableRow>
+                    ) : reviews.map(r => (
+                      <TableRow key={r.id}>
+                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-sm font-medium">{r.user_name}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-0.5">
+                            {[1,2,3,4,5].map(n => (
+                              <Star key={n} className={`h-3.5 w-3.5 ${n <= r.rating ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`} />
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm max-w-[320px]"><p className="line-clamp-3">{r.comment}</p></TableCell>
+                        <TableCell>
+                          {r.approved
+                            ? <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/10">Approved</Badge>
+                            : <Badge variant="secondary">Pending</Badge>}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            {r.approved ? (
+                              <Button size="sm" variant="outline" onClick={() => handleReviewApprove(r.id, false)} className="h-7 gap-1">
+                                <X className="h-3 w-3" /> Unapprove
+                              </Button>
+                            ) : (
+                              <Button size="sm" onClick={() => handleReviewApprove(r.id, true)} className="h-7 gap-1">
+                                <Check className="h-3 w-3" /> Approve
+                              </Button>
+                            )}
+                            <Button size="sm" variant="ghost" onClick={() => handleReviewDelete(r.id)} className="h-7 w-7 p-0 text-destructive hover:text-destructive">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

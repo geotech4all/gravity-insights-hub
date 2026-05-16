@@ -74,8 +74,21 @@ const ReviewSection = () => {
 
   useEffect(() => { load(); }, []);
 
+  // Auto-open the review dialog after returning from sign-in
+  useEffect(() => {
+    if (user && sessionStorage.getItem('pendingReview') === '1') {
+      sessionStorage.removeItem('pendingReview');
+      setOpen(true);
+      // Scroll to reviews section
+      setTimeout(() => {
+        document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [user]);
+
   const handleOpen = () => {
     if (!user) {
+      sessionStorage.setItem('pendingReview', '1');
       navigate('/auth');
       return;
     }
