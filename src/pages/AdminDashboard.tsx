@@ -40,6 +40,16 @@ interface ActivityLog {
   created_at: string;
 }
 
+interface ReviewRow {
+  id: string;
+  user_id: string;
+  user_name: string;
+  rating: number;
+  comment: string;
+  approved: boolean;
+  created_at: string;
+}
+
 const TIER_BADGE: Record<string, string> = {
   free: 'bg-muted text-muted-foreground',
   standard: 'bg-primary/10 text-primary',
