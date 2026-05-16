@@ -11,7 +11,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Users, FolderOpen, Activity, Search, Loader2, Shield, ArrowLeft, Crown } from 'lucide-react';
+import { Users, FolderOpen, Activity, Search, Loader2, Shield, ArrowLeft, Crown, Star, Check, X, Trash2 } from 'lucide-react';
 
 interface UserProfile {
   user_id: string;
