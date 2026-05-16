@@ -63,6 +63,7 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [logs, setLogs] = useState<ActivityLog[]>([]);
+  const [reviews, setReviews] = useState<ReviewRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
 
