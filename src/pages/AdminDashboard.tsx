@@ -188,6 +188,12 @@ const AdminDashboard = () => {
             <TabsTrigger value="users" className="gap-1"><Users className="h-3.5 w-3.5" /> Users</TabsTrigger>
             <TabsTrigger value="projects" className="gap-1"><FolderOpen className="h-3.5 w-3.5" /> Projects</TabsTrigger>
             <TabsTrigger value="activity" className="gap-1"><Activity className="h-3.5 w-3.5" /> Activity</TabsTrigger>
+            <TabsTrigger value="reviews" className="gap-1">
+              <Star className="h-3.5 w-3.5" /> Reviews
+              {reviews.filter(r => !r.approved).length > 0 && (
+                <Badge variant="destructive" className="ml-1 h-4 px-1 text-[10px]">{reviews.filter(r => !r.approved).length}</Badge>
+              )}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="users" className="space-y-4">
