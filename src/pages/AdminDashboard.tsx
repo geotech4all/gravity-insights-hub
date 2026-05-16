@@ -80,14 +80,16 @@ const AdminDashboard = () => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const [usersRes, projectsRes, logsRes] = await Promise.all([
+    const [usersRes, projectsRes, logsRes, reviewsRes] = await Promise.all([
       supabase.from('profiles').select('*').order('created_at', { ascending: false }),
       supabase.from('projects').select('id, name, user_id, data_mode, created_at, updated_at').order('updated_at', { ascending: false }),
       supabase.from('user_activity_logs').select('*').order('created_at', { ascending: false }).limit(200),
+      supabase.from('reviews').select('*').order('created_at', { ascending: false }),
     ]);
     setUsers((usersRes.data as any[]) || []);
     setProjects((projectsRes.data as ProjectRow[]) || []);
     setLogs((logsRes.data as ActivityLog[]) || []);
+    setReviews((reviewsRes.data as ReviewRow[]) || []);
     setLoading(false);
   };
 
@@ -106,6 +108,21 @@ const AdminDashboard = () => {
       });
     }
     toast.success(`Tier updated to ${newTier}. Email notification will be sent when email service is configured.`);
+  };
+
+  const handleReviewApprove = async (id: string, approved: boolean) => {
+    const { error } = await supabase.from('reviews').update({ approved }).eq('id', id);
+    if (error) { toast.error('Failed to update review'); return; }
+    setReviews(prev => prev.map(r => r.id === id ? { ...r, approved } : r));
+    toast.success(approved ? 'Review approved' : 'Review unapproved');
+  };
+
+  const handleReviewDelete = async (id: string) => {
+    if (!confirm('Delete this review permanently?')) return;
+    const { error } = await supabase.from('reviews').delete().eq('id', id);
+    if (error) { toast.error('Failed to delete review'); return; }
+    setReviews(prev => prev.filter(r => r.id !== id));
+    toast.success('Review deleted');
   };
 
   if (isAdmin === null || loading) {
