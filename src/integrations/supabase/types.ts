@@ -412,31 +412,34 @@ export type Database = {
         Row: {
           approved: boolean
           comment: string
+          context: string
           created_at: string
           id: string
           rating: number
           updated_at: string
-          user_id: string
+          user_id: string | null
           user_name: string
         }
         Insert: {
           approved?: boolean
           comment: string
+          context?: string
           created_at?: string
           id?: string
           rating: number
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           user_name: string
         }
         Update: {
           approved?: boolean
           comment?: string
+          context?: string
           created_at?: string
           id?: string
           rating?: number
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           user_name?: string
         }
         Relationships: []
