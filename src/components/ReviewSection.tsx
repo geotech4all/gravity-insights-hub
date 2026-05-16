@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Star, MessageSquarePlus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -8,9 +7,12 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogTrigger,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
+
+const REVIEW_CONTEXT = 'gravimagcloud';
 
 interface Review {
   id: string;
@@ -51,7 +53,6 @@ const formatDate = (iso: string) => {
 };
 
 const ReviewSection = () => {
-  const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
   const [reviews, setReviews] = useState<Review[]>([]);
@@ -59,6 +60,7 @@ const ReviewSection = () => {
   const [open, setOpen] = useState(false);
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState('');
+  const [guestName, setGuestName] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
   const load = async () => {
@@ -66,6 +68,7 @@ const ReviewSection = () => {
       .from('reviews')
       .select('id,user_name,rating,comment,created_at')
       .eq('approved', true)
+      .eq('context', REVIEW_CONTEXT)
       .order('created_at', { ascending: false })
       .limit(9);
     if (!error && data) setReviews(data);
@@ -74,29 +77,18 @@ const ReviewSection = () => {
 
   useEffect(() => { load(); }, []);
 
-  // Auto-open the review dialog after returning from sign-in
+  // Auto-open after returning from sign-in (legacy flow still supported)
   useEffect(() => {
-    if (user && sessionStorage.getItem('pendingReview') === '1') {
+    if (sessionStorage.getItem('pendingReview') === '1') {
       sessionStorage.removeItem('pendingReview');
       setOpen(true);
-      // Scroll to reviews section
       setTimeout(() => {
         document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth' });
       }, 100);
     }
   }, [user]);
 
-  const handleOpen = () => {
-    if (!user) {
-      sessionStorage.setItem('pendingReview', '1');
-      navigate('/auth');
-      return;
-    }
-    setOpen(true);
-  };
-
   const handleSubmit = async () => {
-    if (!user) return;
     const trimmed = comment.trim();
     if (trimmed.length < 10) {
       toast({ title: 'Review too short', description: 'Please write at least 10 characters.', variant: 'destructive' });
@@ -106,17 +98,26 @@ const ReviewSection = () => {
       toast({ title: 'Review too long', description: 'Please keep it under 1000 characters.', variant: 'destructive' });
       return;
     }
+
+    const userName = user
+      ? ((user.user_metadata?.full_name as string) ||
+         (user.user_metadata?.name as string) ||
+         user.email?.split('@')[0] ||
+         'Anonymous')
+      : (guestName.trim() || 'Anonymous');
+
+    if (userName.length > 80) {
+      toast({ title: 'Name too long', description: 'Please keep your name under 80 characters.', variant: 'destructive' });
+      return;
+    }
+
     setSubmitting(true);
-    const userName =
-      (user.user_metadata?.full_name as string) ||
-      (user.user_metadata?.name as string) ||
-      user.email?.split('@')[0] ||
-      'Anonymous';
     const { error } = await supabase.from('reviews').insert({
-      user_id: user.id,
+      user_id: user?.id ?? null,
       user_name: userName,
       rating,
       comment: trimmed,
+      context: REVIEW_CONTEXT,
     });
     setSubmitting(false);
     if (error) {
@@ -126,6 +127,7 @@ const ReviewSection = () => {
     toast({ title: 'Thank you!', description: 'Your review will appear once approved.' });
     setOpen(false);
     setComment('');
+    setGuestName('');
     setRating(5);
   };
 
@@ -175,7 +177,7 @@ const ReviewSection = () => {
       <div className="text-center">
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button size="lg" onClick={handleOpen} className="gap-2">
+            <Button size="lg" onClick={() => setOpen(true)} className="gap-2">
               <MessageSquarePlus className="h-4 w-4" />
               Write a Review
             </Button>
@@ -188,6 +190,17 @@ const ReviewSection = () => {
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 py-2">
+              {!user && (
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-foreground">Your name (optional)</label>
+                  <Input
+                    value={guestName}
+                    onChange={e => setGuestName(e.target.value)}
+                    placeholder="How should we display your name?"
+                    maxLength={80}
+                  />
+                </div>
+              )}
               <div className="space-y-2">
                 <label className="text-sm font-medium text-foreground">Rating</label>
                 <Stars value={rating} onChange={setRating} size={28} />
@@ -197,7 +210,7 @@ const ReviewSection = () => {
                 <Textarea
                   value={comment}
                   onChange={e => setComment(e.target.value)}
-                  placeholder="What do you love? What could be better?"
+                  placeholder="What do you love about GraviMag Cloud? What could be better?"
                   rows={5}
                   maxLength={1000}
                 />
