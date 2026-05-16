@@ -296,7 +296,6 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
-          </TabsContent>
 
           <TabsContent value="reviews">
             <Card>
