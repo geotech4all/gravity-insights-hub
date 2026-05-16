@@ -296,6 +296,65 @@ const AdminDashboard = () => {
               </CardContent>
             </Card>
           </TabsContent>
+          </TabsContent>
+
+          <TabsContent value="reviews">
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Date</TableHead>
+                      <TableHead>User</TableHead>
+                      <TableHead>Rating</TableHead>
+                      <TableHead>Comment</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {reviews.length === 0 ? (
+                      <TableRow><TableCell colSpan={6} className="text-center text-sm text-muted-foreground py-8">No reviews yet</TableCell></TableRow>
+                    ) : reviews.map(r => (
+                      <TableRow key={r.id}>
+                        <TableCell className="text-xs text-muted-foreground whitespace-nowrap">{new Date(r.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-sm font-medium">{r.user_name}</TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-0.5">
+                            {[1,2,3,4,5].map(n => (
+                              <Star key={n} className={`h-3.5 w-3.5 ${n <= r.rating ? 'fill-primary text-primary' : 'text-muted-foreground/30'}`} />
+                            ))}
+                          </div>
+                        </TableCell>
+                        <TableCell className="text-sm max-w-[320px]"><p className="line-clamp-3">{r.comment}</p></TableCell>
+                        <TableCell>
+                          {r.approved
+                            ? <Badge className="bg-green-500/10 text-green-700 hover:bg-green-500/10">Approved</Badge>
+                            : <Badge variant="secondary">Pending</Badge>}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-1">
+                            {r.approved ? (
+                              <Button size="sm" variant="outline" onClick={() => handleReviewApprove(r.id, false)} className="h-7 gap-1">
+                                <X className="h-3 w-3" /> Unapprove
+                              </Button>
+                            ) : (
+                              <Button size="sm" onClick={() => handleReviewApprove(r.id, true)} className="h-7 gap-1">
+                                <Check className="h-3 w-3" /> Approve
+                              </Button>
+                            )}
+                            <Button size="sm" variant="ghost" onClick={() => handleReviewDelete(r.id)} className="h-7 w-7 p-0 text-destructive hover:text-destructive">
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </TabsContent>
         </Tabs>
       </main>
     </div>
